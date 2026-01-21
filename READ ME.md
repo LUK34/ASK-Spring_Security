@@ -1,4 +1,6 @@
+
 # 1. Key Security Principles (Easy Notes)
+
 ### 1.1.Least Privilege
 - Give users and systems only the minimum access they need to do their job, nothing more.
 - In Spring Security, this means roles like USER, ADMIN should access only their allowed endpoints.
@@ -27,6 +29,7 @@
 - Keep frameworks, libraries, and dependencies up to date to avoid known vulnerabilities.
 - Using the latest Spring Security version protects you from already-fixed security flaws.
 
+*** 
 # 2. Heart of Spring Security
 
 ### 2.1 Client Sends Request
@@ -72,3 +75,4 @@
 
 ### 2.9 Response Goes Back Through Filters
 - The response travels back through the filter chain and reaches the client.
+***
