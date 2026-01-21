@@ -76,3 +76,66 @@
 ### 2.9 Response Goes Back Through Filters
 - The response travels back through the filter chain and reaches the client.
 ***
+
+# 3. Form Base Authentication
+### Project : SS_1_FB_4.x.x
+- The defualt authentication in spring security is FORM BASED AUTHENTICATION.
+- 1. Without Spring security
+```
+URL: localhost:8080/hello
+```
+- 2. With Spring security when you execute the above url. The url will redirected to default spring security/
+```
+URL: localhost:8080/login
+```
+- 3. to access the application you need to take the password from the console of your sts ide.
+```
+Username: user
+Passwrod: 6cce3dba-98d8-4f3c-b4cf-2ae5bdd8dfd0
+```
+- 4. After step 2. If you want to logout. there is a logout page as well that can be accessed.
+```
+URL: localhost:8080/logout
+```
+- 5. **---- IMPORTANT ----**
+- If you want to setup a default password. Then in the properties file setup the user password.
+- e.g:
+```
+spring.security.user.password=hello_world
+```
+- 6. After updating the property and try accessing the above url.
+```
+URL: localhost:8080/hello
+```
+- 7. You will be redirected to login page.
+```
+URL: localhost:8080/login
+Username: user
+Passwrod: hello_world
+```
+- 8. ** ---- IMPORTANT ----**
+- Same as step 5. But we add username also.
+```
+spring.security.user.name= hello
+spring.security.user.password=hello_world
+```
+- 9. After updating the property and try accessing the above url.
+```
+URL: localhost:8080/hello
+```
+- 10. You will be redirected to login page.
+```
+URL: localhost:8080/login
+Username: hello
+Passwrod: hello_world
+```
+***
+
+
+
+
+
+
+
+
+
