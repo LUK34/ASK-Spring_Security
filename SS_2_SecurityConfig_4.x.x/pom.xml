@@ -13,7 +13,7 @@
 	<artifactId>SS_2_SecurityConfig_4.x.x</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>SS_2_SecurityConfig_4.x.x</name>
-	<description>1. Spring Security and Form Based Authentication </description>
+	<description>2. Basic Authentication and writing your own Security Filter</description>
 	<url />
 	<licenses>
 		<license />

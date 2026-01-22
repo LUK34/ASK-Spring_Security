@@ -78,7 +78,10 @@
 ***
 
 # 3. Form Base Authentication
-### Project : SS_1_FB_4.x.x
+
+- **Project : SS_1_FB_4.x.x for Java 17 and above**
+- **Project: SS_1_FB_2.7.6 for Java 1.8**
+
 - The defualt authentication in spring security is FORM BASED AUTHENTICATION.
 - 1. Without Spring security
 ```
@@ -131,9 +134,64 @@ Passwrod: hello_world
 ```
 ***
 
+# 4. Basic Authentication using SecurityFilterChain
+### Project : SS_2_SecurityConfig_4.x.x
+- This module uses Spring Security (SecurityFilterChain) with HTTP Basic Authentication to secure REST endpoints.
+- It is designed for internal, closed-network applications and supports browser-based API access without a login UI.
+- **✅ Authentication Mechanism**
+- **Type:** HTTP Basic Authentication
+- **Login Page:** ❌ Not used
+- **Browser Behavior:** Native username/password popup
+- **Session Handling:** Browser caches credentials
+- **Use Case:** REST APIs, internal dashboards, IE11-compatible environments
 
+- **📌 Security Configuration Highlights**
+- Uses SecurityFilterChain (Spring Security 6 compliant)
+- WebSecurityConfigurerAdapter is not used (deprecated)
+- CSRF protection is disabled for REST compatibility
+- Static resources are publicly accessible
+- All other endpoints require authentication
 
+- **📂 Publicly Accessible Paths**
+- The following paths are excluded from authentication:
+```
+/css/**
+/js/**
+/images/**
+/kng/**
+/error
+```
+- These are typically used for static assets and shared UI resources.
 
+- **🔒 Secured Endpoints**
+- All other endpoints require authentication
+```
+GET /hello → Requires Basic Auth
+```
+- **👤 Default User Configuration**
+- Authentication credentials are configured in application.properties:
+```
+spring.security.user.name=hello
+spring.security.user.password=hello_world
+spring.security.user.roles=USER
+```
+- These credentials are suitable for development or internal environments only.
+- For production, consider database-backed authentication or SSO.
+
+- **🧪 How to Test (Browser)**
+- Open:
+```
+http://localhost:8080/hello
+```
+- Browser will prompt for credentials
+
+Enter:
+```
+Username: hello
+Password: hello_world
+```
+- On success → API response is displayed
+- On failure → 401 Unauthorized
 
 
 
