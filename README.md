@@ -340,4 +340,75 @@ ADMIN	ROLE_ADMIN
 
 
 
+# 6. ROLE BASED ACCESS CONTROL (RBAC)
+- **Project: SS_4_RBAC_2.7.6**
+- **Project: SS_4_RBAC_4.x.x**
+
+- For Java 17 and 4.x.x. Apply `@EnableMethodSecurity ` on top of the config class
+```
+@Configuration
+@EnableMethodSecurity // for RBAC -> for Java 17 and above
+public class SecurityConfig 
+{
+...
+}
+```
+
+- For Java 1.8 and 2.7.6. Apply `@EnableGlobalMethodSecurity(prePostEnabled = true)` on top of the config class
+```
+@EnableGlobalMethodSecurity(prePostEnabled = true) // RBAC -> for Java 1.8 and 2.x.x ONLY
+@Configuration
+public class SecurityConfig 
+{
+...
+}
+```
+
+- Did not use DB for this. Define the roles in properties like below:
+```
+# -----------------------------------------
+# Spring Security
+security.role.user=USER
+security.role.admin=ADMIN
+# -----------------------------------------
+```
+
+- After that we have to import these properties using SpEL not using @Value annotation.
+- We are basically creating ROLES that will access certain URLs.
+```
+	//SpEL -> Cant use @Value annotation, wont work
+	@PreAuthorize("hasRole(@environment.getProperty('security.role.user'))") 
+	@GetMapping("/user")
+	public String user_end_point() 
+	{
+		return "Hello from USER.";
+		
+	}
+
+	//SpEL -> Cant use @Value annotation, wont work
+	@PreAuthorize("hasRole(@environment.getProperty('security.role.admin'))") 
+	@GetMapping("/admin")
+	public String admin_end_point() 
+	{
+		return "Hello from ADMIN.";
+		
+	}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
