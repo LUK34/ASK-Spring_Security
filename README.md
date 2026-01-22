@@ -395,8 +395,69 @@ security.role.admin=ADMIN
 	}
 ```
 
+# 7. ROLE BASED ACCESS CONTROL (RBAC) +H2 DB
+- **Project: SS_5_RBAC_H2_2.7.6**
+- **Project: SS_5_RBAC_H2_4.x.x**
+- The main objective is instead of using InMemory Authentication. We are going to use h2 db.
+```
+#------------------------------------------------------------------------------------
+# H2 Database Configuration
+#------------------------------------------------------------------------------------
 
+# JDBC URL (in-memory)
+spring.datasource.url=jdbc:h2:mem:testdb
 
+# Custom username & password
+spring.datasource.username=h2user
+spring.datasource.password=h2password
+
+# H2 Driver
+spring.datasource.driver-class-name=org.h2.Driver
+
+# H2 Console
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+#E.g: localhost:8080/h2-console
+
+#------------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------------
+# JPA (Hibernate)
+#------------------------------------------------------------------------------------
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+#------------------------------------------------------------------------------------
+```
+
+- h2 db for 4.x.x and 2.7.6 uses iframes. So make sure to enable the frames in security layer.
+- To enable the iframe settings use the below code:
+```
+      // ----------------------------------------------------
+            // H2 Console   
+       // ----------------------------------------------------   
+               /*
+                h2Console runs on frames.But spring security will block the frame.
+                So we have to enable by writing the below lines of code.             
+               */
+               .headers(headers ->
+                  // headers.frameOptions(frame -> frame.disable())
+                   headers.frameOptions(frameOptions -> frameOptions.sameOrigin())
+               )
+            // ----------------------------------------------------
+            
+```
+- for 2.7.6 add this below `.authorizeRequests()`
+```
+.antMatchers("/h2-console/**").permitAll() //h2 access given here as well
+```
+
+- for 4.x.x add this below 
+```
+.requestMatchers("/h2-console/**").permitAll() //h2 access given here as well
+```
 
 
 
