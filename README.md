@@ -1,3 +1,5 @@
+# 0. Spring Security Course:
+- Link: https://www.youtube.com/watch?v=29vmP4YLwyo&list=PLxhSr_SLdXGOpdX60nHze41CvExvBOn09
 
 # 1. Key Security Principles (Easy Notes)
 
@@ -135,7 +137,10 @@ Passwrod: hello_world
 ***
 
 # 4. Basic Authentication using SecurityFilterChain
-### Project : SS_2_SecurityConfig_4.x.x
+
+- **Project : SS_2_SecurityConfig_4.x.x**
+- **Project: SS_2_SecurityConfig_2.7.6**
+
 - This module uses Spring Security (SecurityFilterChain) with HTTP Basic Authentication to secure REST endpoints.
 - It is designed for internal, closed-network applications and supports browser-based API access without a login UI.
 - **✅ Authentication Mechanism**
@@ -193,6 +198,145 @@ Password: hello_world
 - On success → API response is displayed
 - On failure → 401 Unauthorized
 
+# 5. In Memory authentication
+- **Project: SS_3_InMemory_2.7.6**
+- **Project: SS_3_InMemory_4.x.x**
+
+- **1. What is In-Memory Authentication?**
+- In-Memory Authentication means:
+- Users are stored inside application memory
+- No database, No LDAP, No external service
+- Users are lost when the application restarts
+- Best for:
+- Learning, Proof of Concepts
+- DEV / UAT
+- Internal tools
+- Not suitable for:
+- Production, Large user bases, Password rotation / audit requirements
+
+- **2️.Line-by-Line Explanation**
+- Bean Declaration
+```
+@Bean
+public UserDetailsService userDetailsService()
+```
+- Declares a Spring bean
+- Spring Security automatically detects this bean
+- Once detected, default authentication is disabled
+- Spring now uses YOUR users instead of auto-generated ones
+
+- Creating a User Object
+```
+UserDetails user1 = User.withUsername("user")
+```
+- Creates a UserDetails object
+- UserDetails is Spring Security’s standard user model
+- user is the login username
+
+- Password Definition
+```
+.password("{noop}user_world")
+```
+- {noop} → No encoding
+- Password is stored as plain text
+- Required so Spring knows how to validate
+- Without {noop}, authentication fails
+- Works on Java 8 / 11 / 17
+
+- Assigning Roles
+```
+.roles("USER")
+```
+- Assigns role USER
+- Internally becomes:
+```
+ROLE_USER
+```
+- Spring Security always prefixes roles with ROLE_
+- Building the User
+```
+.build();
+```
+- Finalizes the UserDetails object
+- Immutable after creation
+- Admin User
+```
+UserDetails admin = User.withUsername("admin")
+```
+- Same logic as user1, but with:
+```
+.roles("ADMIN")
+```
+- Internally:
+```
+ROLE_ADMIN
+```
+- Registering Users in Memory return new InMemoryUserDetailsManager(user1, admin);
+- Stores users in an in-memory map
+```
+Key = username
+Value = UserDetails
+```
+- Thread-safe
+- Fast lookup
+
+- **3️. How Authentication Works at Runtime**
+- Request Flow (Basic Auth Example)
+- Client calls:
+```
+GET /hello
+```
+- Browser sends:
+```
+Authorization: Basic dXNlcjp1c2VyX3dvcmxk
+```
+- Spring Security:
+- Decodes Base64
+- Extracts username & password
+```
+Calls UserDetailsService.loadUserByUsername("user")
+```
+- InMemoryUserDetailsManager:
+- Finds user
+- Compares passwords
+- Checks roles
+- Authentication succeeds → controller is executed
+
+- **4. Role Usage Example**
+- Securing Endpoints
+```
+.authorizeHttpRequests(auth -> auth
+    .requestMatchers("/admin/**").hasRole("ADMIN")
+    .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+    .anyRequest().authenticated()
+)
+```
+- Role Mapping
+```
+Role defined	Spring internal
+USER	ROLE_USER
+ADMIN	ROLE_ADMIN
+```
+- **5. Why {noop} Is Required**
+- Spring Security does not allow plain text passwords by default.
+- {noop} explicitly says:
+```
+“I know what I’m doing. Do not encode.”
+```
+- Without it:
+- IllegalArgumentException: There is no PasswordEncoder mapped for id "null"
+
+- **6️. When NOT to Use In-Memory Authentication**
+- ❌ Production
+- ❌ Compliance environments
+- ❌ User self-registration
+- ❌ Password policies
+
+- **7️. When It’s Perfect**
+- ✔ Learning Spring Security
+- ✔ REST API testing
+- ✔ Internal hospital tools
+- ✔ Offline / intranet systems
 
 
 
