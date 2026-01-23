@@ -459,6 +459,76 @@ spring.jpa.properties.hibernate.format_sql=true
 .requestMatchers("/h2-console/**").permitAll() //h2 access given here as well
 ```
 
+# 8. RBAC + H2 Db -> save the details to Db
+- **Project: SS_5_RBAC_H2_2.7.6**
+- **Project: SS_5_RBAC_H2_4.x.x**
+- Inorder to save the user into db. We need to use DataSource field Injection.
+```
+	@Autowired
+	DataSource datasource;
+```
+- Database Authentication details save into the DB.
+```
+    	// -----------------------------------------------------------------------------------
+    	/*
+    	 	Database Authentication -> Replace In-memory 
+    	 */
+    	JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(datasource);
+    	userDetailsManager.createUser(user1);
+    	userDetailsManager.createUser(admin);
+    	return userDetailsManager;
+    	// -----------------------------------------------------------------------------------
+```
+- For the time being in h2 db. We are going to use the ddl queries defined by `Spring Security in Github`
+- define the queries in a file called `schema.sql`
+```
+CREATE TABLE users (
+    username VARCHAR_IGNORECASE(50) NOT NULL PRIMARY KEY,
+    password VARCHAR_IGNORECASE(500) NOT NULL,
+    enabled BOOLEAN NOT NULL
+);
+
+CREATE TABLE authorities (
+    username VARCHAR_IGNORECASE(50) NOT NULL,
+    authority VARCHAR_IGNORECASE(50) NOT NULL,
+    CONSTRAINT fk_authorities_users
+        FOREIGN KEY (username)
+        REFERENCES users (username)
+);
+
+CREATE UNIQUE INDEX ix_auth_username
+    ON authorities (username, authority);
+```
+- We use Bcrypt password to encrypt the password:
+```
+  //To encrypt the password and save into DB we use passwwordEncoder
+    @Bean
+    public PasswordEncoder passwordEncoder()
+    {
+    	return new BCryptPasswordEncoder();
+    }
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

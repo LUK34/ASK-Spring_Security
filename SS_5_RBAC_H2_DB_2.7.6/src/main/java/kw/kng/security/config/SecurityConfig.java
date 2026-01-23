@@ -1,5 +1,8 @@
 package kw.kng.security.config;
 
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -8,12 +11,17 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @EnableGlobalMethodSecurity(prePostEnabled = true) // RBAC -> for Java 1.8 and 2.x.x ONLY
 @Configuration
-public class SecurityConfig {
+public class SecurityConfig 
+{
+	@Autowired
+	DataSource datasource;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception 
@@ -83,19 +91,43 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() 
     {
 
-    	UserDetails user1= User.withUsername("user")
-                .password("{noop}user_world") 
-                .roles("USER")
-                .build();
+     /*
+   	 		If we want to store the password as plain text we use {noop} along with the actual password
+   	 */
+
+   	UserDetails user1= User.withUsername("user")
+               .password(passwordEncoder().encode("user_world")) //"{noop}user_world"
+               .roles("USER")
+               .build();
+   	
+   	UserDetails admin= User.withUsername("admin")
+   			.password(passwordEncoder().encode("admin_world")) //"{noop}admin_world"
+               .roles("ADMIN")
+               .build();
     	
-    	UserDetails admin= User.withUsername("admin")
-                .password("{noop}admin_world") 
-                .roles("ADMIN")
-                .build();
+    	// -----------------------------------------------------------------------------------
+    	/*
+    	 	Database Authentication -> Replace In-memory 
+    	 */
+    	JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(datasource);
+    	userDetailsManager.createUser(user1);
+    	userDetailsManager.createUser(admin);
+    	return userDetailsManager;
+    	// -----------------------------------------------------------------------------------
+       
     	
-        return new InMemoryUserDetailsManager(user1,admin);
+    	
+    	// return new InMemoryUserDetailsManager(user1,admin);
     }
         
+    
+    //To encrypt the password and save into DB we use passwwordEncoder
+    @Bean
+    public PasswordEncoder passwordEncoder()
+    {
+    	return new BCryptPasswordEncoder();
+    }
+    
 }
 
 
