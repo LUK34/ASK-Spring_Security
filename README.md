@@ -459,7 +459,7 @@ spring.jpa.properties.hibernate.format_sql=true
 .requestMatchers("/h2-console/**").permitAll() //h2 access given here as well
 ```
 
-# 8. RBAC + H2 Db -> save the details to Db
+# 8. RBAC + H2 Db -> save the details to Db + BcryptPassword
 - **Project: SS_5_RBAC_H2_2.7.6**
 - **Project: SS_5_RBAC_H2_4.x.x**
 - Inorder to save the user into db. We need to use DataSource field Injection.
