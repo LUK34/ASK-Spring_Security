@@ -1,70 +1,91 @@
 package kw.kng.controller;
 
 import java.security.Principal;
+import java.util.Collections;
+import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import kw.kng.dto.HrFamilyDto;
+import kw.kng.hr.service.HrService;
+
 @Controller
 public class GreetingsController 
 {
-	@GetMapping("/hello")
-	public String sayHello(Model model, Principal principal) 
+	// ---------------------------------------------------------------------------------------------------
+	private static final Logger logger =  LoggerFactory.getLogger(GreetingsController.class);
+	
+	private HrService hs;
+	public GreetingsController(HrService hs)
 	{
-		   if (principal != null) {
+		this.hs=hs;
+	}
+	// ---------------------------------------------------------------------------------------------------
+	
+	
+	@GetMapping("/hello")
+	public String sayHello(Model model, 
+						  Principal principal,
+						  HttpServletRequest request) 
+	{
+		   if (principal != null) 
+		   {
 	            model.addAttribute("username", principal.getName());
-	        } else {
+	       } 
+		   else 
+	       {
 	            model.addAttribute("username", "UNKNOWN USER");
-	        }
+	       }
+		   
+		    Long militaryId = (Long) request.getSession().getAttribute("militaryId");
+
+		    if (militaryId == null) 
+		    {
+		        logger.warn("Military ID not found in session.");
+		        model.addAttribute("hrFamilyList", Collections.emptyList());
+		        return "home";
+		    }
+
+		    List<HrFamilyDto> hrFamilyDto_list = hs.getHrFamilyDto_List(militaryId);
+
+		    if (hrFamilyDto_list == null || hrFamilyDto_list.isEmpty()) 
+		    {
+		        logger.warn("No HR Data Found for Military ID: {}", militaryId);
+		        hrFamilyDto_list = Collections.emptyList();
+		    }
+
+		    model.addAttribute("hrFamilyList", hrFamilyDto_list);
+		   
 
 		return "home";
 		
 	}
+		
+	@GetMapping("/sso-failed")
+	public String saySsoFailed() 
+	{
+		return "sso-failed";
+	}
+	
+	@GetMapping("/home1")
+	public String home1() 
+	{
+		return "home1";
+	}
+
+	
+	
 
 }
 
 /*
---------------------------------------------------------------------------------------------------------------------------
- 0. The defualt authentication in spring security is FORM BASED AUTHENTICATION.
---------------------------------------------------------------------------------------------------------------------------
-1. Without Spring security
-URL: localhost:8080/hello
---------------------------------------------------------------------------------------------------------------------------
-2. With Spring security when you execute the above url. The url will redirected to default spring security/
-URL: localhost:8080/login
 
--> to access the application you need to take the password from the console of your sts ide.
-e.g:
--> Username: user
--> Passwrod: 6cce3dba-98d8-4f3c-b4cf-2ae5bdd8dfd0
--------------------------------------------------------------------------------------------------------------------------
-3. After step 2. If you want to logout. there is a logout page as well that can be accessed.
-URL: localhost:8080/logout
---------------------------------------------------------------------------------------------------------------------------
-4. ---- IMPORTANT ----
--> If you want to setup a default password. Then in the properties file setup the user password.
-e.g:
-spring.security.user.password=hello_world
--> After updating the property and try accessing the above url.
-URL: localhost:8080/hello
--> You will be redirected to login page.
-URL: localhost:8080/login
--> Username: user
--> Passwrod: hello_world
---------------------------------------------------------------------------------------------------------------------------
-5. ---- IMPORTANT ----
--> Same as step 4. But we add username also.
-e.g:
-spring.security.user.name= hello
-spring.security.user.password=hello_world
--> After updating the property and try accessing the above url.
-URL: localhost:8080/hello
--> You will be redirected to login page.
-URL: localhost:8080/login
--> Username: hello
--> Passwrod: hello_world
---------------------------------------------------------------------------------------------------------------------------
 
 
  

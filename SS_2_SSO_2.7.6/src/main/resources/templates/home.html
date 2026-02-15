@@ -5,9 +5,40 @@
 </head>
 <body>
 
-<h2>Welcome</h2>
+<h2>Welcome User: </h2><b><span th:text="${username}"></span></b>
 
-<p>User: <span th:text="${username}"></span></p>
+<h3>HR Family Details</h3>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Primary ID</th>
+            <th>Civil ID</th>
+            <th>Military ID</th>
+            <th>English Name</th>
+            <th>Arabic Name</th>
+            <th>Designation</th>
+            <th>Nationality</th>
+            <th>Job Status</th>
+            <th>Relation</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="family : ${hrFamilyList}">
+            <td th:text="${family.primaryId}"></td>
+            <td th:text="${family.civilId}"></td>
+            <td th:text="${family.militaryId}"></td>
+            <td th:text="${family.nameEn}"></td>
+            <td th:text="${family.nameAr}"></td>
+            <td th:text="${family.designation}"></td>
+            <td th:text="${family.nationality}"></td>
+            <td th:text="${family.jobStatus}"></td>
+            <td th:text="${family.relation}"></td>
+        </tr>
+    </tbody>
+</table>
+
+
 
 </body>
 </html>

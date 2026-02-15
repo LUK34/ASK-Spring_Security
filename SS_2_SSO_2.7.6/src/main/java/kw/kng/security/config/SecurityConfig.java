@@ -11,54 +11,53 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig 
 {
 
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http,
-	                                       JespaAuthFilter jespaAuthFilter)
-	        throws Exception 
-	{
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           JespaAuthFilter jespaAuthFilter)
+            throws Exception 
+    {
 
-	    http
-	        .csrf().disable()
-	        // ---------------------------------------------------------------------------------------
-	        									//For MVC
-	        .sessionManagement()
-	            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-	        .and()
-	     // ---------------------------------------------------------------------------------------
-	        								// Authentication Details
-	        .authorizeRequests()
-	            .antMatchers(
-	                "/css/**",
-	                "/js/**",
-	                "/images/**",
-	                "/kng/**",
-	                "/error",
-	                "/sso-failed.html"   // sso failed page
-	            ).permitAll()
-	            .anyRequest().authenticated()
-	       // .and()
+        http
+            .csrf().disable()
 
-	        					//If SSO Authentication failed OR ACCESS DENIED ->  Redirect to `sso-failed.html` page
-	       /* .exceptionHandling()
-	            .authenticationEntryPoint((request, response, authException) -> 
-	            {
-	            	System.out.println("AUTHENTICATION FAILED -> calling -> sso-failed.html");
-	                response.sendRedirect(request.getContextPath() + "/sso-failed.html");
-	            })
-	            .accessDeniedHandler((request, response, accessDeniedException) -> 
-	            {
-	            	System.out.println("ACCESS DENIED -> calling -> sso-failed.html");
-	                response.sendRedirect(request.getContextPath() + "/sso-failed.html");
-	            })*/
-	        .and()
-	        .addFilterBefore(jespaAuthFilter, 
-	        		 UsernamePasswordAuthenticationFilter.class);
-	 // ---------------------------------------------------------------------------------------
-	    
-	    
-	    
-	    return http.build();
-	}
+            // Session for MVC app
+            .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            .and()
+
+            // Authorisation rules
+            .authorizeRequests()
+                .antMatchers(
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/kng/**",
+                        "/error",
+                        "/sso-failed"
+                ).permitAll()
+                .anyRequest().authenticated()
+            .and()
+
+            // VERY IMPORTANT
+            .exceptionHandling()
+                .authenticationEntryPoint((request, response, authException) -> 
+                {
+                    response.sendRedirect(request.getContextPath() + "/sso-failed");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> 
+                {
+                    response.sendRedirect(request.getContextPath() + "/sso-failed");
+                })
+            .and()
+
+            // Disable default login mechanisms
+            .formLogin().disable()
+            .httpBasic().disable()
+
+            // Add JESPA bridge filter
+            .addFilterBefore(jespaAuthFilter,
+                    UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
 }
-
-
