@@ -13,7 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import kw.kng.hr.dto.HrFamilyDto;
+import kw.kng.hr.dto.SsoDetailsDto;
 import kw.kng.hr.service.HrService;
+import kw.kng.hr.service.SsoService;
 
 @Controller
 public class GreetingsController 
@@ -22,9 +24,11 @@ public class GreetingsController
 	private static final Logger logger =  LoggerFactory.getLogger(GreetingsController.class);
 	
 	private HrService hs;
-	public GreetingsController(HrService hs)
+	private SsoService ss;
+	public GreetingsController(HrService hs,SsoService ss)
 	{
 		this.hs=hs;
+		this.ss=ss;
 	}
 	// ---------------------------------------------------------------------------------------------------
 	
@@ -40,36 +44,12 @@ public class GreetingsController
 	                       Principal principal,
 	                       HttpServletRequest request) 
 	{
-
-	    if (principal != null) 
-	    {
-	        model.addAttribute("username", principal.getName());
-	    }
-	    else 
-	    {
-	        model.addAttribute("username", "UNKNOWN USER");
-	    }
-
-	    Long militaryId = (Long) request.getSession().getAttribute("militaryId");
-
-	    if (militaryId == null) 
-	    {
-	        logger.warn("Military ID not found in session.");
-	        model.addAttribute("hrFamilyList", Collections.emptyList());
-	     //   return "home";
-	    }
-
-	    @SuppressWarnings("unchecked")
-	    List<HrFamilyDto> hrFamilyDto_list = (List<HrFamilyDto>) request.getSession().getAttribute("hrFamilyList");
-
-	    if (hrFamilyDto_list == null) 
-	    {
-	        logger.warn("HR data not found in session.");
-	        hrFamilyDto_list = Collections.emptyList();
-	    }
-
-	    model.addAttribute("hrFamilyList", hrFamilyDto_list);
-
+		// ----------------------------------------------------------------------------------
+	    SsoDetailsDto ssoData= ss.prepareSSOPageData(principal, request);
+	    model.addAttribute("username", ssoData.getUsername());
+	    model.addAttribute("hrFamilyList", ssoData.getHrFamilyList());
+	    // ----------------------------------------------------------------------------------
+	    
 	    return "home";
 	}
 		
