@@ -21,14 +21,14 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import kw.kng.dto.HrFamilyDto;
+import kw.kng.hr.dto.HrFamilyDto;
 import kw.kng.hr.service.HrService;
 
-@Component
+
 public class JespaAuthFilter extends OncePerRequestFilter {
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(JespaAuthFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(JespaAuthFilter.class);
+    private static final String NTLM_PRINCIPAL_RETRY_FLAG = "NTLM_PRINCIPAL_RETRY_DONE";
 
     private final HrService hs;
 
@@ -37,9 +37,11 @@ public class JespaAuthFilter extends OncePerRequestFilter {
     }
 
     // ---------------------------------------------------------------------------------------------
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    // Skip static resources
+    // ---------------------------------------------------------------------------------------------
+     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) 
+     {
 
         String path = request.getServletPath();
 
@@ -48,48 +50,103 @@ public class JespaAuthFilter extends OncePerRequestFilter {
                 || path.startsWith("/images/")
                 || path.equals("/error")
                 || path.equals("/sso-failed");
-    }
+     }
 
-    // ---------------------------------------------------------------------------------------------
-
-    //MAIN SSO
+     // ---------------------------------------------------------------------------------------------
+     // MAIN SSO BRIDGE FILTER
+     // ---------------------------------------------------------------------------------------------
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
-            throws ServletException, IOException {
+            throws ServletException, IOException 
+    {
 
         logger.info("==== SPRING SSO FILTER ====");
         logger.info("URL: {}", request.getRequestURL());
+        logger.info("DispatcherType: {}", request.getDispatcherType());
+        logger.info("Principal: {}", request.getUserPrincipal());
+        logger.info("RemoteUser: {}", request.getRemoteUser());
+        logger.info("AuthType: {}", request.getAuthType());
 
         // IMPORTANT: Spring may set AnonymousAuthenticationToken (isAuthenticated() == true)
         Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
         
-        // Already authenticated → skip
+        // Already authenticated → skip re-authentication
         if (existingAuth != null
             && existingAuth.isAuthenticated()
             && !(existingAuth instanceof AnonymousAuthenticationToken))
         {
         	logger.info("==== SPRINGBOOT SSO FILTER START ====");
         	logger.info("Already authenticated in Spring Security (non-anonymous). Skipping JespaAuthFilter.");
-
             filterChain.doFilter(request, response);
             return;
         }
 
         // JESPA principal
+        String fullUsername=null;
         Principal principal = request.getUserPrincipal();
-
-        if (principal == null) 
+        if (principal != null) 
         {
-            logger.warn("Principal NULL - JESPA NTLM not completed yet");
+            fullUsername = principal.getName();
+        } 
+        else if (request.getRemoteUser() != null) 
+        {
+            fullUsername = request.getRemoteUser();
+        }
+
+        if (fullUsername == null) 
+        {
+            boolean isNtlm = "NTLM".equalsIgnoreCase(request.getAuthType());
+            Object retryDone = request.getSession().getAttribute(NTLM_PRINCIPAL_RETRY_FLAG);
+
+            logger.warn("No Principal/RemoteUser yet. authType={}, uri={}", request.getAuthType(), request.getRequestURI());
+
+            if (isNtlm && retryDone == null) 
+            {
+                request.getSession().setAttribute(NTLM_PRINCIPAL_RETRY_FLAG, Boolean.TRUE);
+
+                String target = request.getRequestURI();
+                String qs = request.getQueryString();
+                if (qs != null && !qs.trim().isEmpty()) 
+                {
+                    target = target + "?" + qs;
+                }
+
+                logger.warn("NTLM detected but principal not bound yet. Redirecting once to: {}", target);
+                response.sendRedirect(target);
+                return;
+            }
+
+            // Already retried once and still no identity -> continue (or redirect to failure)
+            // You can redirect to /sso-failed here if you prefer:
+            // response.sendRedirect(request.getContextPath() + "/sso-failed"); return;
+
             filterChain.doFilter(request, response);
             return;
         }
+        // Clear retry flag once identity is visible
+        request.getSession().removeAttribute(NTLM_PRINCIPAL_RETRY_FLAG);
+        logger.info("JESPA Identity resolved: {}", fullUsername);
 
-        String fullUsername = principal.getName();
-        logger.info("JESPA Principal: {}", fullUsername);
-
+        logger.info("=======================================================");
+        logger.info("JESPA Identity: {}", fullUsername);
+        logger.info("Principal: {}", request.getUserPrincipal());
+        logger.info("RemoteUser: {}", request.getRemoteUser());
+        logger.info("AuthType: {}", request.getAuthType());
+        logger.info("=======================================================");
+        
+        logger.info("=======================================================");
+        logger.info("Debug all Request Attributes:");
+        java.util.Enumeration<String> attrs = request.getAttributeNames();
+        while (attrs.hasMoreElements()) 
+        {
+        	String name = attrs.nextElement();
+        	Object val = request.getAttribute(name);
+        	logger.info("ATTR: {} = {}", name, val);
+        }
+        logger.info("=======================================================");
+        
         String extractedUsername = extractMilitaryNumber(fullUsername);
         Long militaryId = extractMilitaryId(extractedUsername);
 
@@ -108,10 +165,10 @@ public class JespaAuthFilter extends OncePerRequestFilter {
         // Call service ONLY ONCE per session
         if (request.getSession().getAttribute("hrFamilyList") == null) 
         {
-        	
             try 
             {
                 List<HrFamilyDto> familyList = hs.getHrFamilyDto_List(militaryId);
+                logger.info("Data using Military id is as follows: {}",familyList);
                 request.getSession().setAttribute("hrFamilyList", familyList);
                 logger.info("HR FAMILY DATA LOADED. Count={}", (familyList == null ? 0 : familyList.size()));
             }
@@ -123,12 +180,14 @@ public class JespaAuthFilter extends OncePerRequestFilter {
         
 
         // Create Spring Security Authentication Object from IN MEMORY
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-
+       // List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        List<GrantedAuthority> authorities = new java.util.ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        
         // Update Spring Security Context
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
-                        militaryId, //(Principal
+                		militaryId.toString(), //Principal
                         null,		//Credential
                         authorities //Roles
                 );
@@ -142,6 +201,10 @@ public class JespaAuthFilter extends OncePerRequestFilter {
         logger.info("Spring Security Context Updated -> ROLE_USER from IN MEMORY assigned");
 
         logger.info("Spring Security Context set. principal={}, roles={}", militaryId, authorities);
+        logger.info("Principal={}, Authorities={}",
+                authentication.getPrincipal(),
+                authentication.getAuthorities());
+        
         
         logger.info("==== SPRING SSO FILTER END ====");
         

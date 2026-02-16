@@ -2,7 +2,7 @@ package kw.kng.hr.service;
 
 import java.util.List;
 
-import kw.kng.dto.HrFamilyDto;
+import kw.kng.hr.dto.HrFamilyDto;
 
 public interface HrService 
 {

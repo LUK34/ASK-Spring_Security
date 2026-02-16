@@ -12,7 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import kw.kng.dto.HrFamilyDto;
+import kw.kng.hr.dto.HrFamilyDto;
 import kw.kng.hr.service.HrService;
 
 @Controller
@@ -28,43 +28,49 @@ public class GreetingsController
 	}
 	// ---------------------------------------------------------------------------------------------------
 	
+	@GetMapping("/")
+	public String rootRedirect() 
+	{
+	    return "redirect:/hello";
+	}
+	
 	
 	@GetMapping("/hello")
-	public String sayHello(Model model, 
-						  Principal principal,
-						  HttpServletRequest request) 
+	public String sayHello(Model model,
+	                       Principal principal,
+	                       HttpServletRequest request) 
 	{
-		   if (principal != null) 
-		   {
-	            model.addAttribute("username", principal.getName());
-	       } 
-		   else 
-	       {
-	            model.addAttribute("username", "UNKNOWN USER");
-	       }
-		   
-		    Long militaryId = (Long) request.getSession().getAttribute("militaryId");
 
-		    if (militaryId == null) 
-		    {
-		        logger.warn("Military ID not found in session.");
-		        model.addAttribute("hrFamilyList", Collections.emptyList());
-		        return "home";
-		    }
+	    if (principal != null) 
+	    {
+	        model.addAttribute("username", principal.getName());
+	    }
+	    else 
+	    {
+	        model.addAttribute("username", "UNKNOWN USER");
+	    }
 
-		    List<HrFamilyDto> hrFamilyDto_list = hs.getHrFamilyDto_List(militaryId);
+	    Long militaryId = (Long) request.getSession().getAttribute("militaryId");
 
-		    if (hrFamilyDto_list == null || hrFamilyDto_list.isEmpty()) 
-		    {
-		        logger.warn("No HR Data Found for Military ID: {}", militaryId);
-		        hrFamilyDto_list = Collections.emptyList();
-		    }
+	    if (militaryId == null) 
+	    {
+	        logger.warn("Military ID not found in session.");
+	        model.addAttribute("hrFamilyList", Collections.emptyList());
+	     //   return "home";
+	    }
 
-		    model.addAttribute("hrFamilyList", hrFamilyDto_list);
-		   
+	    @SuppressWarnings("unchecked")
+	    List<HrFamilyDto> hrFamilyDto_list = (List<HrFamilyDto>) request.getSession().getAttribute("hrFamilyList");
 
-		return "home";
-		
+	    if (hrFamilyDto_list == null) 
+	    {
+	        logger.warn("HR data not found in session.");
+	        hrFamilyDto_list = Collections.emptyList();
+	    }
+
+	    model.addAttribute("hrFamilyList", hrFamilyDto_list);
+
+	    return "home";
 	}
 		
 	@GetMapping("/sso-failed")

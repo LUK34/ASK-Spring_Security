@@ -10,7 +10,7 @@
     <display-name>SSS - Spring Boot SSO Test Application</display-name>
 
     <!-- ============================================================= -->
-    <!-- 1️⃣ Character Encoding Filter (Same as Vendor)                -->
+    <!-- 1️. Character Encoding Filter (Same as Vendor)                -->
     <!-- ============================================================= -->
 
     <filter>
@@ -32,13 +32,12 @@
     </filter-mapping>
 
     <!-- ============================================================= -->
-    <!-- 2️⃣ JESPA NTLM SSO Filter                                     -->
+    <!-- 2️. JESPA NTLM SSO Filter                                     -->
     <!-- ============================================================= -->
 
     <filter>
         <filter-name>HttpSecurityFilter</filter-name>
         <filter-class>jespa.http.HttpSecurityFilter</filter-class>
-
         <!-- IMPORTANT: Load sso.prp from WEB-INF -->
         <init-param>
             <param-name>properties.path</param-name>
@@ -51,8 +50,28 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+
+	 <!-- ============================================================= -->
+    <!-- 3. Spring Security Filter Chain                                    -->
     <!-- ============================================================= -->
+
+	<filter>
+    	<filter-name>springSecurityFilterChain</filter-name>
+    	<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    	<init-param>
+        	<param-name>targetFilterLifecycle</param-name>
+        	<param-value>true</param-value>
+    	</init-param>
+	</filter>
+
+	<filter-mapping>
+    	<filter-name>springSecurityFilterChain</filter-name>
+    	<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<!-- ============================================================= -->
     <!-- End of JESPA Configuration                                   -->
     <!-- ============================================================= -->
+    
 
 </web-app>

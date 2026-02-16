@@ -6,9 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import kw.kng.dto.HrFamilyDto;
+import kw.kng.hr.dto.HrFamilyDto;
 import kw.kng.hr.repo.HrRepo;
-import kw.kng.security.config.JespaAuthFilter;
 
 @Service
 public class HrServiceImpl implements HrService 

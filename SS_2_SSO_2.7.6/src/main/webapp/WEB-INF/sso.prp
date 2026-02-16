@@ -16,21 +16,7 @@ http.parameter.logout.name = logout
 
 # --------------------------------------------------------------------------------------------------------
 # Protected Scope -> START
-# --------------------------------------------------------------------------------------------------------
-# Protect entire SSS application
-protected = /sss/*
-
-# DO NOT protect failure page (prevents infinite loop)
-excludes = /sss/sso-failed
-
-# On successful authentication, continue requested URL
-# (DO NOT redirect to /sss/hello here — let Spring handle it)
-# fallback.location should NOT point to a protected page unnecessarily
-
-fallback.location = /
-
-# If authentication fails → redirect here
-error.location = /sss/sso-failed
+# -------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------------------------------------

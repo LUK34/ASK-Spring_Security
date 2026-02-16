@@ -5,17 +5,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 
-import org.springframework.jdbc.core.RowMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import kw.kng.dto.HrFamilyDto;
-import kw.kng.hr.service.HrServiceImpl;
+import kw.kng.hr.dto.HrFamilyDto;
 
 @Repository
 public class HrRepo 

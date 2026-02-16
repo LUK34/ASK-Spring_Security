@@ -1,4 +1,4 @@
-package kw.kng.dto;
+package kw.kng.hr.dto;
 
 import java.time.LocalDate;
 
