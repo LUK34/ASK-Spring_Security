@@ -8,17 +8,18 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import kw.kng.hr.dto.HrFamilyDto;
@@ -148,28 +149,37 @@ public class JespaAuthFilter extends OncePerRequestFilter {
         logger.info("=======================================================");
         
         String extractedUsername = extractMilitaryNumber(fullUsername);
-        Long militaryId = extractMilitaryId(extractedUsername);
 
+     // STRICT VALIDATION
+        if (!isPureNumeric(extractedUsername))
+        {
+            logger.error("Invalid AD username detected (non-numeric): {}", extractedUsername);
+            SecurityContextHolder.clearContext();
+            response.sendRedirect(request.getContextPath() + "/sso-failed");
+            return;     
+        }
+        
+        Long militaryId = extractMilitaryId(extractedUsername);
+        
         if (militaryId == null) 
         {
-            logger.error("Could not extract Military ID from {}", fullUsername);
-            filterChain.doFilter(request, response);
-            return;
+            logger.error("Could not extract Military ID from {}", extractedUsername);
+            SecurityContextHolder.clearContext();
+            response.sendRedirect(request.getContextPath() + "/sso-failed");
+            return;   
         }
 
-        logger.info("Military ID extracted: {}", militaryId);
+        // Now create session only for valid identity
+        HttpSession session = request.getSession(true);
+        session.setAttribute("militaryId", militaryId);
 
-        // Store militaryId in session
-        request.getSession().setAttribute("militaryId", militaryId);
-
-        // Call service ONLY ONCE per session
-        if (request.getSession().getAttribute("hrFamilyList") == null) 
+        if (session.getAttribute("hrFamilyList") == null)
         {
             try 
             {
                 List<HrFamilyDto> familyList = hs.getHrFamilyDto_List(militaryId);
                 logger.info("Data using Military id is as follows: {}",familyList);
-                request.getSession().setAttribute("hrFamilyList", familyList);
+                session.setAttribute("hrFamilyList", familyList);
                 logger.info("HR FAMILY DATA LOADED. Count={}", (familyList == null ? 0 : familyList.size()));
             }
             catch (Exception e) 
@@ -180,7 +190,6 @@ public class JespaAuthFilter extends OncePerRequestFilter {
         
 
         // Create Spring Security Authentication Object from IN MEMORY
-       // List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
         List<GrantedAuthority> authorities = new java.util.ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         
@@ -262,6 +271,17 @@ public class JespaAuthFilter extends OncePerRequestFilter {
             return null;
         }
     }
+    
+	 // -----------------------------------------------------------------------
+	 // Check if username is strictly numeric
+	 // -----------------------------------------------------------------------
+	 private boolean isPureNumeric(String username) 
+	 {
+	     if (username == null) return false;
+	
+	     return username.matches("^\\d+$");
+	 }
+    
 
 }
 

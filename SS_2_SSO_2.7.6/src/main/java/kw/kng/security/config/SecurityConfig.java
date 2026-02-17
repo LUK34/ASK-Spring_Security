@@ -52,21 +52,19 @@ public class SecurityConfig
                 "/error",
                 "/sso-failed"
             ).permitAll()
-            .anyRequest().permitAll()
+            .anyRequest().authenticated()
             .and()
 
             // VERY IMPORTANT
-           /* .exceptionHandling()
-                .authenticationEntryPoint((request, response, authException) -> 
-                {
-                    response.sendRedirect(request.getContextPath() + "/sso-failed");
-                })
-                .accessDeniedHandler((request, response, accessDeniedException) -> 
-                {
-                    response.sendRedirect(request.getContextPath() + "/sso-failed");
-                }) */
             .exceptionHandling()
-            .accessDeniedPage("/sso-failed")
+            	.authenticationEntryPoint((request, response, authException) -> 
+            	{
+            		response.sendRedirect(request.getContextPath() + "/sso-failed");
+            	})
+            	.accessDeniedHandler((request, response, accessDeniedException) -> 
+            	{
+            		response.sendRedirect(request.getContextPath() + "/sso-failed");
+            	})
             .and()
 
             // Disable default login mechanisms
