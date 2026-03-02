@@ -1,4 +1,4 @@
-package kw.kng.hr.service;
+package kw.kng.sso.hr.service;
 
 import java.security.Principal;
 import java.util.Collections;
@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import kw.kng.hr.dto.HrFamilyDto;
-import kw.kng.hr.dto.SsoDetailsDto;
+import kw.kng.sso.hr.dto.HrFamilyDto;
+import kw.kng.sso.hr.dto.SsoDetailsDto;
 
 @Service
 public class SsoServiceImpl implements SsoService 

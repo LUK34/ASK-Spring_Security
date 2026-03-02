@@ -1,4 +1,4 @@
-package kw.kng.hr.repo;
+package kw.kng.sso.hr.repo;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import kw.kng.hr.dto.HrFamilyDto;
+import kw.kng.sso.hr.dto.HrFamilyDto;
 
 @Repository
 public class HrRepo 
@@ -48,7 +48,7 @@ public class HrRepo
 		 logger.info("================== REPO LAYER -> getHrFamilyDto_List -> START ================== ");
 		 logger.info("Military Id: " + militaryId);
 		 
-		 String sql=loadQueryFromFile("sql/pat_history_sql/vw_hr_family_mid.sql");
+		 String sql=loadQueryFromFile("sql/hr/vw_hr_family_mid.sql");
 		 
 		 MapSqlParameterSource params = new MapSqlParameterSource();
 	     params.addValue("militaryId", militaryId);

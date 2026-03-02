@@ -1,4 +1,4 @@
-package kw.kng.hr.dto;
+package kw.kng.sso.hr.dto;
 
 import java.util.List;
 

@@ -1,8 +1,8 @@
-package kw.kng.hr.service;
+package kw.kng.sso.hr.service;
 
 import java.util.List;
 
-import kw.kng.hr.dto.HrFamilyDto;
+import kw.kng.sso.hr.dto.HrFamilyDto;
 
 public interface HrService 
 {

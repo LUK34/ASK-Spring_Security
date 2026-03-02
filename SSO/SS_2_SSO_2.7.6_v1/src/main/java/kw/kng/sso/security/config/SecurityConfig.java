@@ -1,4 +1,4 @@
-package kw.kng.security.config;
+package kw.kng.sso.security.config;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +8,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 
-import kw.kng.hr.service.HrService;
+import kw.kng.sso.hr.service.HrService;
 
 @Configuration
 public class SecurityConfig 

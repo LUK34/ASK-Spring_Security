@@ -1,8 +1,6 @@
-package kw.kng.controller;
+package kw.kng.sso.controller;
 
 import java.security.Principal;
-import java.util.Collections;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,10 +10,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import kw.kng.hr.dto.HrFamilyDto;
-import kw.kng.hr.dto.SsoDetailsDto;
-import kw.kng.hr.service.HrService;
-import kw.kng.hr.service.SsoService;
+import kw.kng.sso.hr.dto.SsoDetailsDto;
+import kw.kng.sso.hr.service.HrService;
+import kw.kng.sso.hr.service.SsoService;
 
 @Controller
 public class GreetingsController 
@@ -35,11 +32,11 @@ public class GreetingsController
 	@GetMapping("/")
 	public String rootRedirect() 
 	{
-	    return "redirect:/hello";
+	    return "redirect:/sso-hello";
 	}
 	
 	
-	@GetMapping("/hello")
+	@GetMapping("/sso-hello")
 	public String sayHello(Model model,
 	                       Principal principal,
 	                       HttpServletRequest request) 
@@ -50,7 +47,7 @@ public class GreetingsController
 	    model.addAttribute("hrFamilyList", ssoData.getHrFamilyList());
 	    // ----------------------------------------------------------------------------------
 	    
-	    return "home";
+	    return "sso-home";
 	}
 		
 	@GetMapping("/sso-failed")
