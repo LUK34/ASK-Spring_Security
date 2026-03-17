@@ -1,0 +1,173 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="core_header">
+
+<header class="kng-header" dir="rtl" id="kngMainHeader">
+
+
+  <!-- --------------------------- RHS START  --------------------------- -->
+  <div class="header-right">
+  
+	<!--  KNG LOGO START -->  
+      <img th:src="@{/kng/legacy/imgs/topLogo.png}"
+         src="/kng/legacy/imgs/topLogo.png"
+         alt="KNG Logo">
+         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <!--  KNG LOGO END -->      
+  
+   <!-- NEXT APPOINTMENT BLOCK DEATILS - START -->
+     
+  <!--   <div class="header-appointment">
+    <div class="appt-title">بيانات الموعد القادم:</div>
+    <div class="appt-divider"></div>
+
+    <th:block th:with="appt=${#lists.isEmpty(nxt_appnmt_list) ? null : nxt_appnmt_list[0]}">
+        <div class="appt-row">
+            <span class="appt-label">اسم العيادة&nbsp;:&nbsp;</span>
+            <span class="appt-value"
+                  th:text="${(appt != null ? appt.officeNameAr : null) ?: 'لا توجد بيانات مواعيد متاحة'}">
+            </span>
+        </div>
+        <div class="appt-row">
+            <span class="appt-label">تاريخ التعيين&nbsp;:&nbsp;</span>
+            <span class="appt-value"
+                  th:text="${(appt != null ? appt.appointDate : null) ?: 'لا توجد بيانات مواعيد متاحة'}">
+            </span>
+        </div>
+        <div class="appt-row">
+            <span class="appt-label">وقت التعيين&nbsp;:&nbsp;</span>
+            <span class="appt-value"
+                  th:text="${(appt != null ? appt.appointTime : null) ?: 'لا توجد بيانات مواعيد متاحة'}">
+            </span>
+        </div>
+    </th:block>
+	</div> -->
+	
+    <!-- NEXT APPOINTMENT BLOCK DEATILS - END -->
+    
+    
+   <!-- NEXT DENTAL CLEANING REMINDER - START -->
+  <!--  	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <div class="header-appointment">
+    <div class="appt-title">بيانات الموعد القادم:</div>
+    <div class="appt-divider"></div>
+
+    <th:block th:with="appt=${#lists.isEmpty(nxt_dntl_list) ? null : nxt_dntl_list[0]}">
+        <div class="appt-row">
+            <span class="appt-label">تاريخ &nbsp;:</span>
+           <span class="appt-value" th:text="${(appt != null ? appt.dentalCleanMonth : null) ?: 'لا توجد بيانات متاحة'}"></span>
+           <span class="appt-value" th:text="${appt != null ? appt.dentalCleanMonth : 'لا توجد بيانات متاحة'}"></span>
+        </div>
+    </th:block>
+	</div> -->
+    <!-- NEXT DENTAL CLEANING REMINDER - END -->
+    
+    
+    <!-- BLOOD BANK COLLECTION - START -->
+  <!--  	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <div class="header-appointment">
+    <div class="appt-title">جمع بنك الدم:</div>
+    <div class="appt-divider"></div>
+
+  <th:block th:with="appt=${#lists.isEmpty(nxt_appnmt_list) ? null : nxt_appnmt_list[0]}">
+        <div class="appt-row">
+            <span class="appt-label">تاريخ &nbsp;:&nbsp;</span>
+            <span class="appt-value" th:text="${(appt != null ? appt.officeNameAr : null) ?: 'لا توجد بيانات مواعيد متاحة'}">
+           <span class="appt-value">لا توجد بيانات متاحة</span>
+        </div>
+   </th:block>
+	</div> -->
+    <!-- BLOOD BANK COLLECTION - END -->
+    
+     
+	 <!--
+    <div class="appt-title">
+		<p>  السجل الطبي الالكتروني </p>
+		<p>Electronic Medical Records</p>
+    </div>
+    -->
+	
+	
+  </div>
+   <!-- --------------------------- RHS START  --------------------------- -->
+    
+  
+   
+  
+  
+  
+  
+  
+
+  <!--  --------------------------- LHS: Sign-out → Rank → Name → Photo → Lang → Time → Date  START ---------------------------  -->
+  <div class="header-left" dir="ltr"> <!-- Force left-to-right order -->
+
+    <!-- Sign Out -->
+    <a href="#" class="exit-btn" title="Sign Out">
+      <i class="fa fa-sign-out"></i> خروج
+    </a>&nbsp;&nbsp;
+
+    <!-- Rank + Name -->
+    <div class="header-user">
+    &nbsp;
+      <span class="username"
+            th:utext="${currentLang == 'ar' ? hrFamilyDto_list.get(0).designation : hrFamilyDto_list.get(0).designation}">
+        نقيب
+      </span>
+      &nbsp;
+       <span class="username">
+       /
+      </span>&nbsp;
+      
+      <span class="username"
+            th:utext="${currentLang == 'ar' ? hrFamilyDto_list.get(0).nameAr : hrFamilyDto_list.get(0).nameAr}">
+        علي عبدالله عيسى النغل
+      </span>&nbsp;&nbsp;
+      
+     
+      
+    </div>&nbsp;&nbsp;
+
+    <!-- Photo -->
+    <div class="header-photo">
+      <img th:src="@{'http://10.201.53.27/files/photo/' + ${hrFamilyDto_list.get(0).militaryId} + '.jpg'}"
+           onerror="this.onerror=null; this.src='./kng/legacy/imgs/avatar5.png';"
+           alt="User Photo">
+    </div>&nbsp;
+
+    <!-- Language -->
+     
+    <div class="lang-select">
+      <label for="langSelect"><i class="fa fa-language"></i></label>&nbsp;&nbsp;
+      <select id="langSelect" onchange="window.location.href=this.value;">
+        <option value="#">Lang</option>
+        <option th:value="${urlWithEnglish}" th:selected="${currentLang == 'en'}">English</option>
+        <option th:value="${urlWithArabic}" th:selected="${currentLang == 'ar'}  or ${currentLang} == null or ${currentLang} == '' ">عربي</option>
+      </select>
+    </div>&nbsp;&nbsp;
+    
+    <!-- Time + Date -->
+    <div class="header-datetime">
+      <span id="kngClock">--:--:--</span>&nbsp;&nbsp;
+      <span id="kngDate">-- --- ----</span>
+    </div>&nbsp;&nbsp;
+	
+	
+	  <div class="kng-header-title">
+   		 	<div class="title-ar">السجل الطبي الالكتروني</div>
+    		<div class="title-en" th:text="#{app_title_en}"></div>
+	</div>
+	
+	
+	
+    
+  </div>
+   <!--  --------------------------- LHS: Sign-out → Rank → Name → Photo → Lang → Time → Date  START ---------------------------  -->
+  
+  
+</header>
+
+</th:block>
+</html>

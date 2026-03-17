@@ -1,0 +1,153 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- --------------------------------------- COMMON JS used for RELATIVE LAYOUT START --------------------------------------- -->
+
+<th:block th:fragment="core_js">
+	<script type="text/javascript" th:src="@{/kng/legacy/jquery/jquery-1.12.4.min.js}"></script>
+	<script type="text/javascript" th:src="@{/kng/legacy/jquery/jquery-ui-1.12.1.min.js}"></script>
+	
+	<script type="text/javascript" th:src="@{/kng/legacy/bootstrap-3.3.7/dist/js/bootstrap.min.js}"></script>
+	<script type="text/javascript" th:src="@{/kng/legacy/bootstrap-datepicker/js/bootstrap-datepicker.min.js}"></script>
+	
+	<script type="text/javascript" th:src="@{/kng/legacy/custom/rela_custom_js/rela_custom.js}"></script>
+	<script type="text/javascript" th:src="@{/kng/legacy/custom/rela_custom_js/tabs_custom.js}"></script>
+	<script type="text/javascript" th:src="@{/kng/legacy/custom/rela_custom_js/wind_func_call.js}"></script>
+
+
+</th:block>
+
+
+<th:block th:fragment="core_dt_js">
+
+    <!-- Core DataTables -->
+    <script th:src="@{/kng/legacy/DataTables/js/jquery.dataTables.min.js}"></script>
+
+    <!-- Bootstrap 3 Integration -->
+    <script th:src="@{/kng/legacy/DataTables/js/dataTables.bootstrap.min.js}"></script>
+
+    <!-- Buttons Extension -->
+    <script th:src="@{/kng/legacy/DataTables/js/dataTables.buttons.min.js}"></script>
+    <script th:src="@{/kng/legacy/DataTables/js/buttons.bootstrap.min.js}"></script>
+    <script th:src="@{/kng/legacy/DataTables/js/buttons.html5.min.js}"></script>
+    <script th:src="@{/kng/legacy/DataTables/js/buttons.print.min.js}"></script>
+
+    <!-- ⭐ Correct ColVis file (NO .min.js available) -->
+    <script th:src="@{/kng/legacy/DataTables/js/buttons.colVis.js}"></script>
+
+    <!-- Excel & PDF dependencies -->
+    <script th:src="@{/kng/legacy/DataTables/js/jszip.min.js}"></script>
+    <script th:src="@{/kng/legacy/DataTables/js/pdfmake.min.js}"></script>
+    <script th:src="@{/kng/legacy/DataTables/js/vfs_fonts.js}"></script>
+
+    <!-- Responsive Extension -->
+    <script th:src="@{/kng/legacy/DataTables/js/dataTables.responsive.min.js}"></script>
+    <script th:src="@{/kng/legacy/DataTables/js/responsive.bootstrap.min.js}"></script>
+
+</th:block>
+
+<th:block th:fragment="core_charts_js">
+
+<script th:src="@{/kng/legacy/charts-2.9.4/js/polyfill.min.js}"></script>
+<script th:src="@{/kng/legacy/charts-2.9.4/js/es6-promise.auto.min.js}"></script>
+<script th:src="@{/kng/legacy/charts-2.9.4/js/fetch.min.js}"></script> 
+
+<script th:src="@{/kng/legacy/charts-2.9.4/js/moment.min.js}"></script>
+<script th:src="@{/kng/legacy/charts-2.9.4/js/chart.min.js}"></script>
+<script th:src="@{/kng/legacy/charts-2.9.4/js/chartjs-plugin-datalabels.min.js}"></script>
+
+<!--  --------------------------------------------------------------------------------- -->
+<!--  Custom IE 11 functions are called here -->
+<script th:src="@{/kng/custom_chart_fncs/bar_line_chart_legacy.js}"></script>
+<script th:src="@{/kng/custom_chart_fncs/bubble_chart_legacy.js}"></script>
+<script th:src="@{/kng/custom_chart_fncs/doughnut_chart_legacy.js}"></script>
+<script th:src="@{/kng/custom_chart_fncs/horizontal_bar_chart_legacy.js}"></script>
+<script th:src="@{/kng/custom_chart_fncs/line_chart_legacy.js}"></script>
+<script th:src="@{/kng/custom_chart_fncs/pie_chart_legacy.js}"></script>
+<script th:src="@{/kng/custom_chart_fncs/polar_area_chart_legacy.js}"></script>
+<script th:src="@{/kng/custom_chart_fncs/radar_chart_legacy.js}"></script>
+<script th:src="@{/kng/custom_chart_fncs/scatter_chart_legacy.js}"></script>
+<script th:src="@{/kng/custom_chart_fncs/vertical_bar_chart_legacy.js}"></script>
+
+<!--  --------------------------------------------------------------------------------- -->
+</th:block>
+
+
+<th:block th:fragment="core_utils_js">
+	<script th:src="@{/kng/data_table_fncs/dataTableCreator_legacy.js}"></script>
+	<script th:src="@{/kng/general_utils_fncs/global_state.js}"></script>
+	<script th:src="@{/kng/general_utils_fncs/general_utils_fncs.js}"></script>
+	<script th:src="@{/kng/general_utils_fncs/toggle_header_fncs.js}"></script>
+	<script th:src="@{/kng/pat_mrd_legacy.js}"></script>
+</th:block>
+
+<th:block th:fragment="brt_utils_js">
+	
+	<script th:src="@{/kng/brtjs/coreReportData.js}"></script>
+	<script th:src="@{/kng/brtjs/coreReportBuilder.js}"></script>
+	<script th:src="@{/kng/brtjs/coreReportModuleWiseBuilder.js}"></script>
+	
+	<!-- #### Individual Birt report js called globally here -> START  #### -->
+		<!-- GENERAL JS START -->
+		<script th:src="@{/kng/brtjs/es.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/mul.js}"></script> <!-- done -->
+		<!-- GENERAL JS END -->
+	
+		<!-- INVESTIGATIONS JS START -->
+		<script th:src="@{/kng/brtjs/xray.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/lab.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/klpcollectedcount.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/klpaccessedcount.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/lpcpr.js}"></script>	<!-- done -->
+		<!-- INVESTIGATIONS JS END -->
+		
+		<!-- PATIENT VISIT JS START -->
+		<script th:src="@{/kng/brtjs/pvbddr.js}"></script>	<!-- done -->
+		<script th:src="@{/kng/brtjs/cpd.js}"></script>	<!-- done -->
+		<script th:src="@{/kng/brtjs/pmvps.js}"></script>	<!-- done -->
+		<script th:src="@{/kng/brtjs/pyvps.js}"></script>	<!-- done -->
+		<script th:src="@{/kng/brtjs/procmvps.js}"></script>	<!-- done -->
+		<script th:src="@{/kng/brtjs/procyvps.js}"></script>	<!-- done -->
+		<script th:src="@{/kng/brtjs/pvcbpdw.js}"></script>	<!-- done -->
+		<script th:src="@{/kng/brtjs/sv.js}"></script>	<!-- done -->
+		<script th:src="@{/kng/brtjs/pc.js}"></script>	<!-- done -->
+		<script th:src="@{/kng/brtjs/vc.js}"></script>	<!-- done -->
+		<script th:src="@{/kng/brtjs/pvoscf.js}"></script> <!-- done -->
+		<!-- PATIENT VISIT JS START -->
+		
+		<!-- PHARMACY JS START -->
+		<script th:src="@{/kng/brtjs/mscw.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/mbkp.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/pitdr.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/pvh.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/phavoscf.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/mrt.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/ptit.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/tsiacr.js}"></script> <!-- done -->
+		<!-- PHARMACY JS END -->
+		
+		<!-- SICK LEAVE JS START -->
+		<script th:src="@{/kng/brtjs/slbdsr.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/slsr.js}"></script> <!-- done -->
+		<script th:src="@{/kng/brtjs/edbd.js}"></script> <!-- done -->
+		<!-- SICK LEAVE JS END -->
+		<!-- #### Individual Birt report js called globally here -> END  #### -->
+
+</th:block>
+
+
+<th:block th:fragment="appo_js">
+
+	<script th:src="@{/kng/appo/js/appoForm.js}"></script>
+	<script th:src="@{/kng/appo/js/appoModal.js}"></script>
+	<script th:src="@{/kng/appo/js/appoSearch.js}"></script>
+
+</th:block>
+
+<th:block th:fragment="sso_js">
+	<script th:src="@{/kng/sso/js/sso.js}"></script>
+</th:block>
+
+
+<!-- --------------------------------------- COMMON JS used for RELATIVE LAYOUT START --------------------------------------- -->
+
+</html>

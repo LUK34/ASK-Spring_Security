@@ -1,0 +1,21 @@
+*.medas-grey{color:#F8F8F8}
+*.medas-white{color:#FFFFFF}
+*.medas-birt-title-blue{color:#558b2f}
+*.medas-fheading33
+{
+	margin: 1px 1px 1px 1px;
+    height: 26;
+    background-color: #F8F8F8;/*#595f69, #043d93, #043d93*/
+    color: #558b2f;  /* OLD: #043D93 */
+    border: 1px solid #ddd;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    font-weight: normal;
+}
+*.medas-linklist
+{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    color:#558b2f; /* NEW: #558b2f OLD:#4F8EDC */
+}

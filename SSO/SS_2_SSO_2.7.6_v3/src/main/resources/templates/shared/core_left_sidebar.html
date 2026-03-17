@@ -1,0 +1,216 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="core_left_sidebar">
+
+  <!-- LEFT NOTES SIDEBAR (FIXED) -->
+  <div class="sidebar sidebar-left" id="notesLeftSidebar">
+
+    <div class="panel panel-default" align="center">
+      
+      <!-- HEADER WITH TOGGLE BUTTON -->
+      <div class="panel-heading">
+       <div class="row">
+       
+        <div class="col-xs-2"></div>
+      
+         <div class ="col-xs-8 text-center">
+        <strong>(Notes) ملاحظات</strong></div>
+
+ <div class ="col-xs-2 text-right">
+        <button type="button" id="notesToggleBtn"
+                title="Toggle Notes"
+                style="border:0;background:transparent;cursor:pointer;font-size:18px;line-height:1; ">
+          <i class="fa fa-bars"></i>
+        </button>
+      </div>
+      </div>
+      </div>
+
+      <div class="panel-body">
+
+        <textarea id="notesText"
+                  class="form-control"
+                  rows="4"
+                  placeholder="Write note here..."></textarea>
+
+        <div style="margin-top:10px; display:flex; gap:10px;">
+          <button type="button" class="btn btn-success" id="notesSaveBtn" style="flex:1;">Save</button>
+          <button type="button" class="btn btn-danger" id="notesClearBtn" style="flex:1;">Clear</button>
+        </div>
+
+        <hr/>
+
+        <div style="font-weight:700; margin-bottom:8px;">Saved Notes</div>
+
+        <div id="notesList"
+             style="max-height:45vh; overflow:auto; border:1px solid #eee; padding:8px; border-radius:4px;">
+          <div style="color:#777;">No notes yet.</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SMALL EDGE HANDLE (VISIBLE ONLY WHEN SIDEBAR IS CLOSED) -->
+  <button type="button" id="notesOpenHandle" title="Open Notes"
+          style="position:fixed;left:6px;top:140px;z-index:10000;display:none;
+                 border:1px solid #ddd;background:#fff;border-radius:10px;
+                 padding:8px 10px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.08);">
+    <i class="fa fa-sticky-note"></i>
+  </button>
+
+  <style>
+    /* only positioning. Styling comes from rela_custom.css because same "sidebar" class */
+    .sidebar.sidebar-left{
+      position: fixed;
+      left: 0;
+      right: auto;
+      top: 0;        /* JS will set exact top */
+      height: auto;  /* JS will set exact height */
+      z-index: 9999;
+
+      width: 320px;                 /* fixed width (adjust if needed) */
+      transition: left .25s ease;    /* IE11 safe */
+    }
+
+    /* CLOSED state: move sidebar outside screen to the left */
+    body.notes-collapsed #notesLeftSidebar{
+      left: -340px;  /* width + small extra */
+    }
+  </style>
+
+  <script>
+    (function(){
+      // ---------- auto align top/height to match header gap ----------
+      function setLeftSidebarTop(){
+        var mainH = document.getElementById("kngMainHeader");
+        var subH  = document.getElementById("kngSubHeader");
+        var leftS = document.getElementById("notesLeftSidebar");
+        if(!leftS) return;
+
+        var top = 0;
+        if(mainH) top += mainH.offsetHeight;
+        if(subH)  top += subH.offsetHeight;
+
+        leftS.style.top = top + "px";
+        leftS.style.height = "calc(100vh - " + top + "px)";
+      }
+
+      window.addEventListener("load", setLeftSidebarTop);
+      window.addEventListener("resize", setLeftSidebarTop);
+      setTimeout(setLeftSidebarTop, 300);
+
+      // ---------- notes storage ----------
+      var KEY = "kng_notes_v1";
+      var notes = [];
+
+      var notesText = document.getElementById("notesText");
+      var saveBtn = document.getElementById("notesSaveBtn");
+      var clearBtn = document.getElementById("notesClearBtn");
+      var list = document.getElementById("notesList");
+
+      function load(){
+        try{ notes = JSON.parse(localStorage.getItem(KEY) || "[]"); }
+        catch(e){ notes = []; }
+      }
+      function fmt(ts){ try { return new Date(ts).toLocaleString(); } catch(e){ return ""; } }
+
+      function render(){
+        list.innerHTML = "";
+        if(!notes.length){
+          list.innerHTML = '<div style="color:#777;">No notes yet.</div>';
+          return;
+        }
+
+        for(var i=0; i<notes.length; i++){
+          (function(idx){
+            var n = notes[idx];
+            var row = document.createElement("div");
+            row.style.border = "1px solid #eee";
+            row.style.borderRadius = "6px";
+            row.style.padding = "8px";
+            row.style.marginBottom = "8px";
+
+            row.innerHTML =
+              '<div style="display:flex;justify-content:space-between;color:#777;font-size:11px;margin-bottom:6px;">' +
+                '<span>'+ fmt(n.ts) +'</span>' +
+                '<button type="button" data-i="'+ idx +'" style="border:0;background:transparent;cursor:pointer;">x</button>' +
+              '</div>' +
+              '<div style="color:#333;font-size:13px;word-break:break-word;">' + (n.text || "") + '</div>';
+
+            list.appendChild(row);
+
+          })(i);
+        }
+
+        // bind delete buttons (IE11 safe loop)
+        var btns = list.querySelectorAll("button[data-i]");
+        for(var b=0; b<btns.length; b++){
+          btns[b].addEventListener("click", function(){
+            var idx = parseInt(this.getAttribute("data-i"), 10);
+            notes.splice(idx, 1);
+            localStorage.setItem(KEY, JSON.stringify(notes));
+            render();
+          });
+        }
+      }
+
+      function save(){
+        var t = (notesText.value || "").trim();
+        if(!t) return;
+        notes.unshift({ text: t, ts: Date.now() });
+        localStorage.setItem(KEY, JSON.stringify(notes));
+        notesText.value = "";
+        render();
+      }
+
+      saveBtn.addEventListener("click", save);
+      clearBtn.addEventListener("click", function(){ notesText.value = ""; });
+
+      load(); render();
+
+      // ---------- sidebar toggle + remember state ----------
+      var toggleBtn = document.getElementById("notesToggleBtn");
+      var handle = document.getElementById("notesOpenHandle");
+      var STATE_KEY = "kng_notes_sidebar";
+
+      function syncHandle(){
+        var closed = document.body.classList.contains("notes-collapsed");
+        if(handle) handle.style.display = closed ? "block" : "none";
+      }
+
+      // restore state
+      try{
+        if(localStorage.getItem(STATE_KEY) === "closed"){
+          document.body.classList.add("notes-collapsed");
+        }
+      }catch(e){}
+
+      if(toggleBtn){
+        toggleBtn.addEventListener("click", function(){
+          document.body.classList.toggle("notes-collapsed");
+          try{
+            localStorage.setItem(
+              STATE_KEY,
+              document.body.classList.contains("notes-collapsed") ? "closed" : "open"
+            );
+          }catch(e){}
+          syncHandle();
+        });
+      }
+
+      if(handle){
+        handle.addEventListener("click", function(){
+          document.body.classList.remove("notes-collapsed");
+          try{ localStorage.setItem(STATE_KEY, "open"); }catch(e){}
+          syncHandle();
+        });
+      }
+
+      syncHandle();
+
+    })();
+  </script>
+
+</th:block>
+</html>

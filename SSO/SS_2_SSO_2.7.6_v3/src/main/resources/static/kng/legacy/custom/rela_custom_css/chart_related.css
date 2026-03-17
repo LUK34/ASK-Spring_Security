@@ -1,0 +1,69 @@
+
+/* -------------------------------------------------------------------------------------------------------------------------- */
+											/* CHART HEADER  */
+.office-header-ie {
+    background-color: #558b2f;   /* same green */
+    color: #ffffff;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 10px 0;
+    margin: 15px 0 10px 0;
+    border-radius: 6px;
+}
+
+
+/* -------------------------------------------------------------------------------------------------------------------------- */
+
+											/* CARD RELATED CSS */
+.ie-panel {
+    border-radius: 6px;
+}
+
+/* Green header */
+.ie-panel-heading {
+    background-color: #558b2f !important; /* green */
+    color: #ffffff !important;
+    text-align: center;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+/* Centered title */
+.ie-panel-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+}
+
+/* Centered title */
+.ie-panel-small-title {
+    font-size: 10px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+}
+
+
+/* -------------------------------------------------------------------------------------------------------------------------- */
+
+.label-green {
+    background-color: #558b2f; /* green */
+    color: #ffffff;            /* white text */
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+
+.center-label {
+    display: block;
+    text-align: center;
+    margin: 0 auto 8px auto;
+}
+
+
+

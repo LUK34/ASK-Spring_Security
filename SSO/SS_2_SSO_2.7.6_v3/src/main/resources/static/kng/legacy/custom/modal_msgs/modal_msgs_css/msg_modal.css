@@ -1,0 +1,292 @@
+/*=========================================================================================================================================*/	
+										/* ============================= */
+										/* ===== MISSING MODAL ===== */
+										/* ============================= */
+
+/* ===== MODAL CONTAINER ===== */
+.missing-alert-modal {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* ===== HEADER ===== */
+.missing-header {
+    background-color: #558b2f;
+    border-bottom: none;
+    text-align: center;
+    padding: 15px 20px;
+}
+
+.missing-header-title {
+    color: #ffffff;
+    font-weight: 600;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+}
+
+/* Remove Bootstrap default left alignment */
+.missing-header .modal-title {
+    margin: 0 auto;
+}
+
+/* ===== WHITE BODY ===== */
+.missing-alert-modal .modal-body {
+    background-color: #ffffff;
+    padding: 30px;
+}
+
+/* ===== NAME LINE ===== */
+.missing-name-line {
+    font-weight: bold;
+    margin-bottom: 18px; /* space between name and missing data */
+    color: #000000;
+}
+
+/* ===== EACH PERSON BLOCK ===== */
+.missing-box-red {
+    margin-bottom: 30px;
+}
+
+/* ===== RED INLINE HIGHLIGHTED MISSING MESSAGE ===== */
+.missing-data-line {
+    display: inline-block;   /* Prevent full width */
+    background-color: #b30000;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 20px;     /* pill style */
+    font-size: 14px;
+}
+
+/* ===== FOOTER CENTER ALIGN ===== */
+.missing-footer {
+    background-color: #ffffff;
+    border-top: none;
+    text-align: center !important;   /* Override Bootstrap */
+    padding: 20px 0;
+}
+
+/* ===== GREEN OK BUTTON ===== */
+.missing-ok-btn {
+    background-color: #558b2f;
+    border-color: #558b2f;
+    color: #ffffff;
+    min-width: 130px;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 25px;
+    border-radius: 4px;
+}
+
+.missing-ok-btn:hover,
+.missing-ok-btn:focus {
+    background-color: #558b2f;
+    border-color: #558b2f;
+    color: #ffffff;
+}
+
+/*=========================================================================================================================================*/
+
+										/* ============================= */
+										/* ===== WELCOME MODAL ===== */
+										/* ============================= */
+
+.welcome-modal-container {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* ===== HEADER ===== */
+.welcome-header {
+    background-color: #558b2f;
+    border-bottom: none;
+    text-align: center;
+    padding: 15px 20px;
+}
+
+.welcome-header-title {
+    color: #ffffff;
+    margin: 0;
+    font-weight: 600;
+    text-align: center;
+    width: 100%;
+}
+
+/* ===== BODY ===== */
+.welcome-modal-container .modal-body {
+    padding: 30px;
+}
+
+/* Main Welcome Text */
+.welcome-message {
+    color: #558b2f;
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+/* Sub paragraph */
+.welcome-sub-message {
+    margin-top: 10px;
+    font-size: 15px;
+}
+
+/* ===== FOOTER ===== */
+.welcome-footer {
+    text-align: center !important;
+    border-top: none;
+    padding: 20px 0;
+}
+
+/* ===== CONTINUE BUTTON ===== */
+.welcome-continue-btn {
+    background-color: #558b2f;
+    border-color: #558b2f;
+    color: #ffffff;
+    min-width: 130px;
+    font-weight: 600;
+    padding: 8px 25px;
+}
+
+.welcome-continue-btn:hover,
+.welcome-continue-btn:focus {
+    background-color: #558b2f;
+    border-color: #558b2f;
+    color: #ffffff;
+}
+
+
+
+/*=========================================================================================================================================*/
+
+									/* ============================= */
+									/* ===== SUMMARY REPORT MODAL ===== */
+									/* ============================= */
+
+.modal-summary-xl {
+    width: 95%;
+    max-width: 1400px;
+}
+
+/* ===== HEADER ===== */
+.summary-header {
+    background-color: #558b2f;
+    color: white;
+    text-align: center;
+}
+
+.summary-header .modal-title {
+    color: white;
+    font-weight: bold;
+}
+
+/* ===== BODY SCROLL CONTROL ===== */
+.summary-body {
+    max-height: 70vh;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+/* ===== DEPARTMENT HEADER ===== */
+.department-header {
+    background-color: #558b2f;
+    color: white;
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: center; 
+}
+
+.dept-name {
+    margin: 0;
+    font-weight: bold;
+    color: white;
+    text-align: center; 
+}
+
+/* ===== DOCTOR CONTENT SECTION ===== */
+.doctor-content-section {
+    width: 100%;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+/* LEFT SIDE (Doctor + Date) */
+.doctor-left {
+    float: left;
+    width: 25%;
+    text-align: left;          /* FORCE LEFT */
+}
+
+.doctor-details-wrapper {
+    padding-left: 5px;         /* Align visually with department title */
+}
+
+.doctor-details {
+    margin: 0;
+    font-weight: bold;
+    text-align: left;          /* DOUBLE SAFE FOR IE */
+}
+
+/* VERTICAL DIVIDER */
+.doctor-divider {
+    float: left;
+    width: 2%;
+    border-left: 2px solid #d0d0d0;
+    height: 100%;              /* FULL HEIGHT */
+    min-height: 60px;
+}
+
+/* RIGHT SIDE (Entered Details) */
+.doctor-right {
+    float: right;
+    width: 73%;
+    text-align: left;
+}
+
+.doctor-entered-details {
+    margin: 0;
+}
+
+/* ===== FOOTER ===== */
+.summary-footer {
+    background-color: #ffffff;
+    text-align: center;
+}
+
+/* GREEN OK BUTTON */
+.btn-summary-ok {
+    background-color: #558b2f;
+    color: white;
+    border: none;
+    padding: 6px 25px;
+}
+
+.btn-summary-ok:hover,
+.btn-summary-ok:focus {
+    background-color: #4a7a29;
+    color: white;
+}
+
+
+.inner-record-line {
+    border: 0;
+    height: 1px;
+    background: #e0e0e0;
+    margin: 15px 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

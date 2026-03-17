@@ -1,0 +1,62 @@
+/* ===============================
+   SMALL BOX – IE11 SAFE
+   Bootstrap 3 compatible
+================================ */
+
+/* clickable wrapper */
+.small-box-link {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+}
+
+.small-box-link:hover,
+.small-box-link:focus {
+    text-decoration: none;
+    color: #fff;
+}
+
+/* main box */
+.small-box {
+    position: relative;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    min-height: 120px;
+}
+
+/* content */
+.small-box .inner h3 {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 0 0 5px 0;
+}
+
+.small-box .inner p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* icon (NO flexbox – IE11 safe) */
+.small-box .icon {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 60px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* hover effect (IE11 safe) */
+.small-box:hover {
+    opacity: 0.9;
+}
+
+/* colors */
+.bg-green {
+    background-color: #00a65a;
+}
+
+.bg-red {
+    background-color: #dd4b39;
+}

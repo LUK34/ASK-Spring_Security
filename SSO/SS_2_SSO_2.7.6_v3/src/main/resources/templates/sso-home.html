@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{sso-layout}">
+<head>
+<title>KNG SSO Success</title>
+</head>
+<div layout:fragment="content">
+
+	<div class="container" style="margin-top:40px;">
+	
+	    <!-- Welcome Panel -->
+	    <div class="panel panel-default sso-box">
+	
+	        <div class="panel-heading sso-header">
+	            KNG SSO Login Successful
+	        </div>
+	
+	        <div class="panel-body text-center">
+	
+	            <h4>
+	                Welcome User:
+	                <strong>
+	                    <span th:text="${username}"></span>
+	                </strong>
+	            </h4>
+	
+	        </div>
+	
+	    </div>
+	
+	
+	    <!-- HR Family Details -->
+	    <div class="panel panel-default">
+	
+	        <div class="panel-heading sso-header">
+	            HR Family Details
+	        </div>
+	
+	        <div class="panel-body">
+	
+	            <div class="table-responsive">
+	
+	                <table class="table table-bordered table-striped table-hover">
+	
+	                    <thead>
+	                        <tr>
+	                            <th>Primary ID</th>
+	                            <th>Civil ID</th>
+	                            <th>Military ID</th>
+	                            <th>English Name</th>
+	                            <th>Arabic Name</th>
+	                            <th>Designation</th>
+	                            <th>Nationality</th>
+	                            <th>Job Status</th>
+	                            <th>Relation</th>
+	                        </tr>
+	                    </thead>
+	
+	                    <tbody>
+	
+	                        <tr th:each="family : ${hrFamilyList}">
+	
+	                            <td th:text="${family.primaryId}"></td>
+	                            <td th:text="${family.civilId}"></td>
+	                            <td th:text="${family.militaryId}"></td>
+	                            <td th:text="${family.nameEn}"></td>
+	                            <td th:text="${family.nameAr}"></td>
+	                            <td th:text="${family.designation}"></td>
+	                            <td th:text="${family.nationality}"></td>
+	                            <td th:text="${family.jobStatus}"></td>
+	                            <td th:text="${family.relation}"></td>
+	
+	                        </tr>
+	
+	                    </tbody>
+	
+	                </table>
+	
+	            </div>
+	
+	        </div>
+	
+	    </div>
+	
+	</div>
+
+</div>
+
+
+<div layout:fragment="script">
+
+  
+</div>
+</html>

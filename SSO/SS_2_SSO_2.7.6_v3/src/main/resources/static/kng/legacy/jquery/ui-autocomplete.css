@@ -1,0 +1,16 @@
+.ui-autocomplete{
+    max-height:200px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    z-index:1051 !important;
+}
+
+.ui-menu-item-wrapper{
+    padding:6px 10px;
+}
+
+.ui-state-active{
+    background:#558b2f !important;
+    border-color:#558b2f !important;
+    color:#fff !important;
+}
