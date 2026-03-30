@@ -9,6 +9,8 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import kw.kng.sso.hr.dto.HrFamilyDto;
@@ -122,4 +124,46 @@ public class SsoServiceImpl implements SsoService
         logger.warn("HR Family List not found in session.");
         return Collections.emptyList();
     }
+    
+    @Override
+	public Long getLogged_SSO_MilitaryId() 
+	{
+		logger.info("================== SERVICE -> getLoggedInMilitaryId -> START ==================");
+
+		    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+		    if (auth == null) 
+		    {
+		    	logger.info("❌ Authentication is NULL");
+		        return null;
+		    }
+
+		    if (!auth.isAuthenticated()) 
+		    {
+		    	logger.info("❌ User is NOT authenticated");
+		        return null;
+		    }
+
+		    Object principal = auth.getPrincipal();
+
+		    if (principal == null) 
+		    {
+		    	logger.info("❌ Principal is NULL");
+		        return null;
+		    }
+
+		    try 
+		    {
+		        Long mid = Long.parseLong(principal.toString());
+		        logger.info("✅ MID resolved from SecurityContext: " + mid);
+
+		        logger.info("================== SERVICE -> getLoggedInMilitaryId -> END ==================");
+		        return mid;
+		    } 
+		    catch (NumberFormatException e) 
+		    {
+		    	logger.warn("❌ Failed to parse MID from principal: " + principal);
+		        return null;
+		    }
+	}
 }
