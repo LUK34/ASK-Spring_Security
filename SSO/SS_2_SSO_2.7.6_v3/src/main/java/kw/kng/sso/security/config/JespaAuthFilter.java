@@ -2,7 +2,10 @@ package kw.kng.sso.security.config;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -12,6 +15,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,11 +29,21 @@ import kw.kng.sso.hr.dto.HrFamilyDto;
 import kw.kng.sso.hr.service.HrService;
 
 
-public class JespaAuthFilter extends OncePerRequestFilter {
+public class JespaAuthFilter extends OncePerRequestFilter 
+{
 
     private static final Logger logger = LoggerFactory.getLogger(JespaAuthFilter.class);
     private static final String NTLM_PRINCIPAL_RETRY_FLAG = "NTLM_PRINCIPAL_RETRY_DONE";
 
+    // ---------------------------------------------------------------------------------------------
+    @Value("${sso.mid}")
+    private Long ssoMid;
+    
+    @Value("${sso.mid.list}")
+    private String ssoMidList;
+    // ---------------------------------------------------------------------------------------------
+    
+    
     private final HrService hs;
     private final SsoProps ssoProps;
 
@@ -38,6 +52,53 @@ public class JespaAuthFilter extends OncePerRequestFilter {
         this.hs = hs;
         this.ssoProps=ssoProps;
     }
+    
+    
+ // ##############################################################################################################################################################
+    public List<Long> getSsoMidListAsLong() 
+    {
+        System.out.println("Raw Property Value: " + ssoMidList);
+
+        if (ssoMidList == null || ssoMidList.trim().isEmpty()) 
+        {
+            return Collections.emptyList();
+        }
+
+        List<Long> midList = Arrays.stream(ssoMidList.split(","))
+                .map(String::trim)              // remove spaces
+                .filter(s -> !s.isEmpty())     // ignore empty values
+                .map(Long::parseLong)          // convert to Long
+                .collect(Collectors.toList());
+
+        System.out.println("Converted MID List: " + midList);
+
+        return midList;
+    }
+    
+    public Long military_Id_Bypasser(Long militaryId)
+    {
+    	List<Long> mids = getSsoMidListAsLong();
+    	System.out.println("Exception Militray Id List -> "+mids);
+    	Long use_me_mid=militaryId;
+    	
+    	if (militaryId != null && mids.contains(militaryId)) 
+    	{
+    		
+    	    logger.info("Military ID {} found in configured list. Overriding with 1914", militaryId);
+    	    use_me_mid = ssoMid;
+    	    logger.info("------- By Pass -> by using use_me_mid ------- -> "+use_me_mid);
+    	} 
+    	else 
+    	{
+    	    logger.info("Military ID {} NOT in configured list. Using original value", militaryId);
+    	    use_me_mid=militaryId;
+    	}
+    	return use_me_mid;
+    }
+    
+   // ##############################################################################################################################################################
+    
+    
 
     // ---------------------------------------------------------------------------------------------
     // Skip static resources
@@ -76,7 +137,8 @@ public class JespaAuthFilter extends OncePerRequestFilter {
             Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
             if (existingAuth == null || !existingAuth.isAuthenticated()) 
             {
-                List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+                //List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            	List<GrantedAuthority> authorities = Collections.<GrantedAuthority>singletonList(new SimpleGrantedAuthority("ROLE_USER"));
                 UsernamePasswordAuthenticationToken authentication =   new UsernamePasswordAuthenticationToken(
                                 ssoProps.getSsoMid().toString(),
                                 null,
@@ -187,6 +249,7 @@ public class JespaAuthFilter extends OncePerRequestFilter {
         }
         
         Long militaryId = extractMilitaryId(extractedUsername);
+        Long effectiveMilitaryId = military_Id_Bypasser(militaryId);
         
         if (militaryId == null) 
         {
@@ -198,17 +261,19 @@ public class JespaAuthFilter extends OncePerRequestFilter {
 
         // Now create session only for valid identity
         HttpSession session = request.getSession(true);
-        session.setAttribute("militaryId", militaryId);
+        session.setAttribute("militaryId", effectiveMilitaryId);
 
         if (session.getAttribute("hrFamilyList") == null)
         {
             try 
             {
-                List<HrFamilyDto> familyList = hs.getHrFamilyDto_List(militaryId);
+            	//Long use_me_mid=military_Id_Bypasser(militaryId);
+            	
+                List<HrFamilyDto> familyList = hs.getHrFamilyDto_List(effectiveMilitaryId);
                 logger.info("Data using Military id is as follows: {}",familyList);
                 if (familyList == null || familyList.isEmpty())
                 {
-                    logger.error("No HR data found for Military ID: {}", militaryId);
+                    logger.error("No HR data found for Military ID: {}", effectiveMilitaryId);
 
                     SecurityContextHolder.clearContext();
                     response.sendRedirect(request.getContextPath() + "/sso-hr-failed");
@@ -236,7 +301,7 @@ public class JespaAuthFilter extends OncePerRequestFilter {
         // Update Spring Security Context
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
-                		militaryId.toString(), //Principal
+                		effectiveMilitaryId.toString(), //Principal
                         null,		//Credential
                         authorities //Roles
                 );
@@ -249,7 +314,7 @@ public class JespaAuthFilter extends OncePerRequestFilter {
 
         logger.info("Spring Security Context Updated -> ROLE_USER from IN MEMORY assigned");
 
-        logger.info("Spring Security Context set. principal={}, roles={}", militaryId, authorities);
+        logger.info("Spring Security Context set. principal={}, roles={}", effectiveMilitaryId, authorities);
         logger.info("Principal={}, Authorities={}",
                 authentication.getPrincipal(),
                 authentication.getAuthorities());

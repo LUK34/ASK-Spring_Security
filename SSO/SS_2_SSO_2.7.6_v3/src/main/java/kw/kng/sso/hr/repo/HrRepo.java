@@ -14,7 +14,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+
 import kw.kng.sso.hr.dto.HrFamilyDto;
+import kw.kng.sso.hr.dto.SSoUserDto;
 
 @Repository
 public class HrRepo 
@@ -26,6 +28,32 @@ public class HrRepo
 	 @Autowired
 	 private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	// ------------------------------------------------------------------------------------------------------ 
+	 
+	// ------------------------------------------------------------------------------------------------------
+		
+		 private RowMapper<SSoUserDto> sso_user_RowMapper() 
+		 {
+			 System.out.println("REPO -> BOILER PLATE CODE RESOLVER -> sso_user_RowMapper() -> START");
+		     return (rs, rowNum) -> 
+		     {
+		    	 SSoUserDto h = new SSoUserDto();
+			 	 h.setPrimaryId(rs.getLong("PRIMARY_ID"));
+		    	 h.setCivilId(rs.getLong("CIVIL_ID_NO"));
+		    	 h.setMilitaryId(rs.getLong("MILITARY_NO"));
+		    	 h.setNameEn(rs.getString("NAME_E"));
+		    	 h.setNameAr(rs.getString("NAME_A"));
+		    	 h.setGender(rs.getString("GENDER"));
+		    	 h.setDesignation(rs.getString("DESIGNATION"));
+		    	 h.setMobileNo(rs.getLong("MOBILE_NO"));
+		    	 h.setNationality(rs.getString("NATIONALITY"));
+		    	 h.setJobStatus(rs.getString("JOB_STATUS"));
+		    	 h.setRelation(rs.getString("RELATION"));
+		         
+		         System.out.println("REPO -> BOILER PLATE CODE RESOLVER -> sso_user_RowMapper() -> END");
+		         return h;
+		     };
+		 }
+		// ------------------------------------------------------------------------------------------------------
 	 
 	 private String loadQueryFromFile(String filePath) 
 	 {
@@ -72,6 +100,21 @@ public class HrRepo
 	    logger.info("================== REPO LAYER -> getHrFamilyDto_List -> END ================== ");
 	    
 	    return namedParameterJdbcTemplate.query(sql, params, rowMapper); 
+	 }
+	 
+	 public List<SSoUserDto> get_NUTRIO_SSO_USER_details(Integer militaryId)
+	 {
+		 System.out.println("================== REPO LAYER -> get_sso_UserDto_List -> START ================== ");
+		 System.out.println("Military Id: " + militaryId);
+		 
+		 String sql=loadQueryFromFile("sql/hr/nutrio_sso_user_mid.sql");
+		 
+		 MapSqlParameterSource params = new MapSqlParameterSource();
+	     params.addValue("militaryId", militaryId);
+		 
+	     System.out.println("================== REPO LAYER -> get_sso_UserDto_List -> END ================== ");
+	    
+	    return namedParameterJdbcTemplate.query(sql, params, sso_user_RowMapper()); 
 	 }
 
 }
