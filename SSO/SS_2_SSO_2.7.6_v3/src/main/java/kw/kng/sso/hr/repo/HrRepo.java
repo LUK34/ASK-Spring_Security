@@ -116,5 +116,37 @@ public class HrRepo
 	    
 	    return namedParameterJdbcTemplate.query(sql, params, sso_user_RowMapper()); 
 	 }
+	 
+	 
+	 public List<HrFamilyDto> nutrio_getHrFamilyDto_List(Long militaryId)
+	 {
+		 logger.info("================== REPO LAYER -> nutrio_getHrFamilyDto_List -> START ================== ");
+		 logger.info("Military Id: " + militaryId);
+		 
+		 String sql=loadQueryFromFile("sql/hr/nutrio_hr_family_mid.sql");
+		 
+		 MapSqlParameterSource params = new MapSqlParameterSource();
+	     params.addValue("militaryId", militaryId);
+		 
+	     RowMapper<HrFamilyDto> rowMapper = (rs, rowNum) -> 
+	     {
+	    	 	HrFamilyDto  hf = new HrFamilyDto();
+	    	 	hf.setPrimaryId(rs.getLong("PRIMARY_ID"));
+	    	 	hf.setCivilId(rs.getLong("CIVIL_ID_NO"));
+	    	 	hf.setMilitaryId(rs.getLong("MILITARY_NO"));
+	    	 	hf.setNameEn(rs.getString("NAME_E"));
+	    	 	hf.setNameAr(rs.getString("NAME_A"));
+	    	 	hf.setGender(rs.getString("GENDER"));
+	    	 	hf.setDesignation(rs.getString("DESIGNATION"));
+	    	 	hf.setMobileNo(rs.getLong("MOBILE_NO"));
+	    	 	hf.setNationality(rs.getString("NATIONALITY"));
+	    	 	hf.setJobStatus(rs.getString("JOB_STATUS"));
+	    	 	hf.setRelation(rs.getString("RELATION"));
+	            return hf;
+	    };
+	    logger.info("================== REPO LAYER -> nutrio_getHrFamilyDto_List -> END ================== ");
+	    
+	    return namedParameterJdbcTemplate.query(sql, params, rowMapper); 
+	 }
 
 }

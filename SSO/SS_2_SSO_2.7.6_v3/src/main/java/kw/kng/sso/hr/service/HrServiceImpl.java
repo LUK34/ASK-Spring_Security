@@ -51,4 +51,33 @@ public class HrServiceImpl implements HrService
 		return hrFamilyDto_list;
 	}
 
+	@Override
+	public List<HrFamilyDto> nutrio_getHrFamilyDto_List(Long militaryId) 
+	{
+		logger.info("================== SERVICE LAYER -> nutrio_getHrFamilyDto_List -> START ================== ");
+		logger.info("Military Id: " + militaryId);
+		
+		List<HrFamilyDto> hrFamilyDto_list= h_repo.nutrio_getHrFamilyDto_List(militaryId);
+		if (hrFamilyDto_list == null || hrFamilyDto_list.isEmpty()) 
+		{
+		    logger.warn("No HR Data Found for Military ID: ", militaryId);
+		}
+		
+		hrFamilyDto_list.forEach(m ->
+			System.out.println("Officers Family Details" +
+				"Primary Id: " +m.getPrimaryId()+
+				"Civil Id: "+m.getCivilId()+
+				"Military Id: "+m.getMilitaryId()+
+				"English Name: "+m.getNameEn()+
+				"Arabic Name: "+m.getNameAr()+
+				"Designation: "+m.getDesignation()+
+				"Nationality: "+m.getNationality()+
+				"Job Status: "+m.getJobStatus()+
+				"Relation: "+m.getRelation()
+				)		
+		);
+		logger.info("================== SERVICE LAYER -> nutrio_getHrFamilyDto_List -> END ================== ");
+		return hrFamilyDto_list;
+	}
+
 }

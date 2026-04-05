@@ -27,6 +27,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import kw.kng.sso.hr.dto.HrFamilyDto;
 import kw.kng.sso.hr.service.HrService;
+import kw.kng.sso.hr.service.SsoService;
 
 
 public class JespaAuthFilter extends OncePerRequestFilter 
@@ -41,13 +42,17 @@ public class JespaAuthFilter extends OncePerRequestFilter
     
     @Value("${sso.mid.list}")
     private String ssoMidList;
+    
+    @Value("${app.name}")
+    private String app_name;
     // ---------------------------------------------------------------------------------------------
     
     
     private final HrService hs;
     private final SsoProps ssoProps;
 
-    public JespaAuthFilter(HrService hs,SsoProps ssoProps) 
+    public JespaAuthFilter(HrService hs,
+    					   SsoProps ssoProps) 
     {
         this.hs = hs;
         this.ssoProps=ssoProps;
@@ -95,6 +100,8 @@ public class JespaAuthFilter extends OncePerRequestFilter
     	}
     	return use_me_mid;
     }
+    
+    
     
    // ##############################################################################################################################################################
     
@@ -269,8 +276,21 @@ public class JespaAuthFilter extends OncePerRequestFilter
             {
             	//Long use_me_mid=military_Id_Bypasser(militaryId);
             	
-                List<HrFamilyDto> familyList = hs.getHrFamilyDto_List(effectiveMilitaryId);
-                logger.info("Data using Military id is as follows: {}",familyList);
+            	List<HrFamilyDto> familyList;
+            	
+            	if (app_name.toLowerCase().contains("nutriv"))  // Specific to NUTRIO Schema ONLY -> nutriv
+            	{
+            		logger.info(" -------------------- > JESPA -> APP_NAME: ", app_name," specific to NUTRIO schema ONLY");
+            		familyList = hs.nutrio_getHrFamilyDto_List(effectiveMilitaryId);	 
+            	}
+                
+            	else// Specific to ECLINIC Schema ONLY -> mepi, patmrd,sss
+            	{
+            		logger.info(" -------------------- > JESPA -> APP_NAME: ", app_name," specific to ECLINIC schema ONLY");
+            		familyList = hs.getHrFamilyDto_List(effectiveMilitaryId);
+            	}
+                
+            	logger.info("Data using Military id is as follows: {}",familyList);
                 if (familyList == null || familyList.isEmpty())
                 {
                     logger.error("No HR data found for Military ID: {}", effectiveMilitaryId);
@@ -282,6 +302,8 @@ public class JespaAuthFilter extends OncePerRequestFilter
 
                 session.setAttribute("hrFamilyList", familyList);
                 logger.info("HR FAMILY DATA LOADED. Count={}", familyList.size());
+                
+               
             }
             catch (Exception e) 
             {
