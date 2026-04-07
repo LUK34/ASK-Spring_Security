@@ -48,6 +48,7 @@ public class SecurityConfig
                 "/css/**",
                 "/js/**",
                 "/images/**",
+                "/admin/**",
                 "/kng/**",
                 "/error",
                 "/sso-failed",

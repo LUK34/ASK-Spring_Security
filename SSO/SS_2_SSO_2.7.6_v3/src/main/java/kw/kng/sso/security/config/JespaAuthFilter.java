@@ -119,6 +119,7 @@ public class JespaAuthFilter extends OncePerRequestFilter
         return path.startsWith("/css/")
                 || path.startsWith("/js/")
                 || path.startsWith("/images/")
+                || path.startsWith("/admin/")
                 || path.startsWith("/kng/")
                 || path.equals("/error")
                 || path.equals("/sso-failed")
