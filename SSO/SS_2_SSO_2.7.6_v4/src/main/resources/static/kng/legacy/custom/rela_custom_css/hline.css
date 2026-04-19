@@ -1,0 +1,14 @@
+.hline {
+    border: 0;
+    height: 2px;
+    background: #888; /* strong visible mid-gray */
+    margin: 20px 0;
+}
+
+
+.hline-thick {
+    border: 0;
+    height: 10px;
+    background: #999;
+    margin: 20px 0;
+}

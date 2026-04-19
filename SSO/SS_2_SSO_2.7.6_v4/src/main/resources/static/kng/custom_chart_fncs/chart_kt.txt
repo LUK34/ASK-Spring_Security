@@ -1,0 +1,40 @@
+  $(document).ready(function () 
+  {
+		pie_chart("family_pie_chart", ["Father", "Person", "Sons"],[10, 20, 30],["#000000","#008000", "#0000FF"]);
+		horizontal_bar_chart("family_horizontal_bar_chart", ["Father","Person","Sons"], [5,14,9], ["#000000","#008000","#0000FF"]);	
+		vertical_bar_chart("family_vertical_bar_chart", ["Father","Person","Sons"], [12,19,7], ["#000000","#008000","#0000FF"]);
+	
+		pie_chart("family_pie_chart_1", ["Father", "Person", "Sons"],[10, 20, 30],["#000000","#008000", "#0000FF"]);
+		horizontal_bar_chart("family_horizontal_bar_chart_1", ["Father","Person","Sons"], [5,14,9], ["#000000","#008000","#0000FF"]);	
+		vertical_bar_chart("family_vertical_bar_chart_1", ["Father","Person","Sons"], [12,19,7], ["#000000","#008000","#0000FF"]);
+	
+	
+	
+        doughnut_chart("family_doughnut_chart", ["Father","Person","Sons"], [10,20,30], ["#000000","#008000","#0000FF"]);
+        polar_area_chart("family_polar_area_chart", ["Father","Person","Sons"], [8,15,12], ["#000000","#008000","#0000FF"]);
+        bar_line_chart("family_bar_line_chart", ["Jan","Feb","Mar"], [10,15,12],[8,18,10]); // 1.bar values, //2. line values
+        line_chart("family_line_chart", ["Jan","Feb","Mar"], [10,20,15], "#008000");   // line color
+        radar_chart("family_radar_area_chart", ["Speed","Strength","Agility"], [65,59,80], "rgba(0,128,0,0.2)", "#008000");
+	    bubble_chart("family_bubble_chart",[
+              { x:10, y:15, r:10 },
+              { x:20, y:10, r:15 },
+              { x:30, y:25, r:20 }
+             ],
+             "#008000");
+	    scatter_chart("family_scatter_chart",[
+                { x:5, y:10 },
+                { x:15, y:5 },
+                { x:20, y:12 }
+              ],
+              "#0000FF");
+        
+        // Father -> "#000000"
+        // Person -> "#008000"
+        // Son -> "#0000FF"
+  });
+  
+  
+  
+  
+    
+//--------------------------------------------------------------------------------------------------------------------------

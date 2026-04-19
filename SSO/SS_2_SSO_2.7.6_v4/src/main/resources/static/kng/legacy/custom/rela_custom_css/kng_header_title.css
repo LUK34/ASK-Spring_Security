@@ -1,0 +1,33 @@
+.kng-header-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    /* IE11 compatible centering */
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+
+    text-align: center;
+    direction: rtl;
+
+    color: #ffffff;
+    pointer-events: none; /* avoids blocking header clicks */
+}
+
+/* Arabic title (TOP) */
+.kng-header-title .title-ar {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+/* English title (BOTTOM) */
+.kng-header-title .title-en {
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0.95;
+    direction: ltr;
+    line-height: 1.3;
+    white-space: nowrap;
+}

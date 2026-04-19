@@ -1,0 +1,82 @@
+/* =====================================================
+   Doctor Dashboard - IE11 Compatible Styles
+   ===================================================== */
+
+.legacy-title {
+    margin: 20px 0 15px;
+    font-weight: bold;
+}
+
+/* Card container */
+.legacy-doctor-card {
+    border: 1px solid #ddd;
+    background: #ffffff;
+    margin-bottom: 20px;
+}
+
+/* Header */
+.legacy-card-header {
+    background: #f0ad4e; /* AdminLTE warning */
+    padding: 10px;
+    overflow: hidden; /* float clear */
+}
+
+/* Avatar */
+.legacy-avatar {
+    float: left;
+    width: 60px;
+}
+
+.legacy-avatar img {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+/* Header text */
+.legacy-header-text {
+    margin-left: 70px;
+}
+
+.legacy-doctor-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.legacy-doctor-dept {
+    font-size: 13px;
+    color: #fff;
+    margin-top: 3px;
+}
+
+/* Body */
+.legacy-card-body {
+    padding: 10px;
+}
+
+/* List */
+.legacy-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.legacy-list li {
+    border-bottom: 1px solid #eee;
+    padding: 6px 0;
+    font-size: 13px;
+}
+
+.legacy-list li:last-child {
+    border-bottom: none;
+}
+
+/* Wrapping long text */
+.legacy-wrap {
+    white-space: normal;
+    text-align: right;
+    max-width: 150px;
+    display: inline-block;
+}

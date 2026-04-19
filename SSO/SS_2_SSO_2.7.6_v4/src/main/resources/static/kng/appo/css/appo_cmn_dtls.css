@@ -1,0 +1,25 @@
+.common-details-box{
+    background-color:#558b2f;
+    padding:15px;
+    border-radius:6px;
+    margin-bottom:15px;
+}
+
+.common-details-title{
+    color:#ffffff;
+    font-size:18px;
+    font-weight:bold;
+    text-align:center;
+    margin-bottom:15px;
+}
+
+.common-label{
+    color:#ffffff;
+    font-size:14px;
+    font-weight:bold;
+}
+
+.common-value{
+    color:#ffffff;
+    font-size:14px;
+}

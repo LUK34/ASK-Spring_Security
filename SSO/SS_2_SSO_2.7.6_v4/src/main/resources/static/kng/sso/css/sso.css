@@ -1,0 +1,49 @@
+/* Page center alignment */
+.sso-center-wrapper {
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Box styling */
+.sso-box {
+    width: 420px;
+    border-radius: 6px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+/* Header styling */
+.sso-header {
+    background-color: #558b2f !important;
+    color: #ffffff !important;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Body styling */
+.sso-body {
+    text-align: center;
+    font-size: 16px;
+    color: #558b2f;
+    padding: 30px;
+}
+
+.sso-header {
+    background-color: #558b2f !important;
+    color: white !important;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Panel styling */
+.sso-box {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+/* Table header styling */
+table thead tr {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}

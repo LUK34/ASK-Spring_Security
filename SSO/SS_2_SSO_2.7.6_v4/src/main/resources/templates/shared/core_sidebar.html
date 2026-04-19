@@ -1,0 +1,153 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="core_sidebar">
+
+	<!--  --------------------------------------------style="direction: ltr;"-------------------------------------------------------------------------------------- -->
+	<div class="col-md-3 sidebar">
+	
+		<!-- ##################################################### SEARCH BAR -> START  #####################################################  -->
+		<div class="search-bar">
+			<input type="text" id="searchInput" placeholder="Search folders or data..." />
+		</div>
+		<!-- ##################################################### SEARCH BAR -> END  #####################################################  -->
+		  	
+     	<!-- ##################################################### DYNAMIC SIDBAR OPTIONS from TABLE -> START  #####################################################  -->
+     	<div class="panel-group" id="dataAccordion">
+
+			<div th:each="member, iterStat : ${moduleSetup_List}" class="panel panel-default">
+
+				<div class="panel-heading" th:attr="id='heading-' + ${iterStat.index}">
+				                    
+					<h4 class="panel-title">
+													    
+							<!-- ------------------------MODULE -> SUB_MODULE_STATUS -> N -> START ------------------------------------------- -->
+							<a th:if="${member.subModuleStatus == 'N'}" 
+							   th:href="@{${member.urlLink}}"
+							   class="module-row">								
+								 
+								<span class="side-right">	 
+        								<!-- <span class="patient-name" th:text="${member.moduleNameEn}"></span> -->
+        								<span class="patient-name" th:text="'(' + ${member.moduleNameEn} + ') ' + ${member.moduleNameAr}"></span>
+        								&nbsp;&nbsp;
+        								<i th:class="${member.fontIcon}"></i>
+								</span>
+								
+							</a>
+						   <!-- ------------------------MODULE -> SUB_MODULE_STATUS -> N -> END ------------------------------------------- --> 
+						   <!-- ------------------------MODULE -> SUB_MODULE_STATUS -> Y -> START ------------------------------------------- -->
+							<div th:if="${member.subModuleStatus == 'Y'}"
+                 				 class="module-row"
+                 				 data-toggle="collapse"
+                 				 th:attr="data-target='#collapse-' + ${iterStat.index}">
+								
+							    <span class="side-left">
+							        <i class="fa fa-angle-down caret-icon"></i>&nbsp;&nbsp;
+							    </span>
+								
+								<span class="side-right">
+        								<!-- <span class="patient-name" th:text="${member.moduleNameEn}"></span> -->
+        								<span class="patient-name" th:text="'(' + ${member.moduleNameEn} + ') ' + ${member.moduleNameAr}"></span>
+        								&nbsp;&nbsp;
+        								<i th:class="${member.fontIcon}"></i>
+								</span>
+								
+							</div>
+						  <!-- ------------------------MODULE -> SUB_MODULE_STATUS -> Y -> END ------------------------------------------- -->
+					</h4>
+				</div>
+
+				<!-- ------------------------ SUB_MODULE -> MODULE_ID -> START ------------------------------------------- --> 
+				  <div th:if="${member.subModuleStatus == 'Y'}"
+         				th:attr="id='collapse-' + ${iterStat.index}"
+         				class="panel-collapse collapse">
+
+        		 <div class="panel-body">
+            		<a th:each="item : ${subModuleSetup_List}"
+               			th:if="${item.moduleId == member.moduleId}"
+                        th:href="@{${item.urlLink}}"  		
+               			style="display:block; margin-bottom:5px;">
+                		<span class="file-label">
+                    		<span th:text="'(' + ${item.subModuleNameEn} + ') ' + ${item.subModuleNameAr}"></span> 
+                		</span>
+                		&nbsp;
+                		<i th:class="${item.fontIcon}"></i>
+            		</a>
+        		</div>
+
+    			</div>
+				<!-- ------------------------ SUB_MODULE -> MODULE_ID -> END ------------------------------------------- -->				
+
+			</div> <!-- /panel -->
+		</div> <!-- /panel-group -->
+     	<!-- ##################################################### DYNAMIC SIDBAR OPTIONS from TABLE -> END  #####################################################  -->
+     	
+     	
+		<!-- ##################################################### RELATIVE SIDBAR OPTIONS -> START  #####################################################  -->     	
+		<!-- Bootstrap 3 panel-based accordion -->
+		<div class="panel-group" id="dataAccordion">
+
+			<div th:each="member, iterStat : ${hrFamilyDto_list}" class="panel panel-default">
+
+				<div class="panel-heading"
+				     th:attr="id='heading-' + ${iterStat.index}"
+				     th:classappend="${member.gender == 'Male' and !#lists.contains({'KNG Officer','Father','Mother'}, member.relation)} ? ' header-male-border' :
+				                    (${member.gender == 'Female' and !#lists.contains({'KNG Officer','Father','Mother'}, member.relation)} ? ' header-female-border' : '')">
+
+					<h4 class="panel-title">
+						<a data-toggle="collapse"
+						   th:attr="href='#collapse-' + ${iterStat.index}"
+						   th:attrappend="data-target='#collapse-' + ${iterStat.index}"
+						   aria-expanded="false">
+							
+													    
+							   <!-- GROUP 1: LEFT SIDE (arrow + gender) -->
+							    <span class="side-left">
+							        <i class="fa fa-angle-down caret-icon"></i>&nbsp;&nbsp;
+							        <i class="fa"
+							           th:classappend="${member.gender == 'Male'} ? ' fa-male gender-icon male' : ' fa-female gender-icon female'"
+							           th:if="${!#lists.contains({'KNG Officer','Father','Mother'}, member.relation)}">
+							        </i>
+							    </span>
+
+							    <!-- GROUP 2: RIGHT SIDE (name + folder) -->
+							    <span class="side-right">
+							        <span class="patient-name" th:text="${member.nameAr}"></span>&nbsp;&nbsp;
+							        <i class="fa fa-folder folder-icon"></i>
+							    </span>
+								
+						</a>
+					</h4>
+				</div>
+
+				<div th:attr="id='collapse-' + ${iterStat.index}"
+				     class="panel-collapse collapse"
+				     th:attrappend="aria-labelledby='heading-' + ${iterStat.index}">
+
+					<div class="panel-body">
+						<a th:each="item : ${patMedHistorySmryDto_List}"
+						   th:href="@{/medic_history(mid=${member.militaryId}, cid=${member.civilId}, code=${item.subCode})}"
+						   th:attr="data-value=${'(' + item.totalCount + ')' + item.subNameEn}"
+						   onclick="showContent(this.getAttribute('data-value'))"
+						   style="display:block; margin-bottom:5px;">
+							<span class="file-label">
+								(<span th:text="${item.totalCount}">0</span>)
+								<span th:text="${item.subNameEn}">File Name</span>
+							</span>
+							&nbsp;
+							<i class="fa fa-file file-icon"></i>
+						</a>
+					</div>
+				</div>
+				
+			</div> <!-- /panel -->
+		</div> <!-- /panel-group -->
+		<!-- ##################################################### RELATIVE SIDBAR OPTIONS -> END  #####################################################  -->     	
+		
+		
+			
+	</div>
+	<!--  ---------------------------------------------------------------------------------------------------------------------------------- -->
+</th:block>
+
+
+</html>
+

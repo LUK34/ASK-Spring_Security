@@ -1,0 +1,45 @@
+# --------------------------------------------------------------------------------------------------------
+# To use this example edit the properties.path init-param in the web.xml
+#
+# This example HttpSecurityService properties file uses the
+# NtlmSecurityProvider to authenticate and authorize clients with an Active
+# Directory authority.
+#
+# Note: This is the equivalent of example_ntlm_web.xml but loaded
+# indirectly with the HttpSecurityService properties.path property in
+# the web.xml.
+# --------------------------------------------------------------------------------------------------------
+provider.classname = jespa.ntlm.NtlmSecurityProvider
+http.parameter.username.name = username
+http.parameter.password.name = password
+http.parameter.logout.name = logout
+
+# --------------------------------------------------------------------------------------------------------
+# Protected Scope -> START
+# -------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------------------------
+# Logging -> START
+# --------------------------------------------------------------------------------------------------------
+jespa.log.path = /usr/medasapp/apache-tomcat-9.0.70/logs/jespa.log
+jespa.log.level = 4
+# --------------------------------------------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------------------------------------------
+# AD Configuration
+# --------------------------------------------------------------------------------------------------------
+jespa.account.canonicalForm = 4 
+# Replace the following with properties determined in Step 1 of Installation
+
+#dns.servers = 192.168.15.110,192.168.15.115
+jespa.bindstr = kng.kw
+jespa.default.domain = kng.kw
+jespa.localhost.dns.name = knghqad01.kng.kw,knghqad02.kng.kw,kngscad01.kng.kw,kngscad02.kng.kw,kngdrad01.kng.kw,kngdrad02.kng.kw
+jespa.dns.servers = 10.201.49.79,10.201.145.78,10.201.49.163,10.201.49.81,10.201.49.146,10.201.145.79
+jespa.dns.site = DC1-HQ,DC2-SC,DR-K2
+jespa.service.acctname = ssomedas$@kng.kw
+jespa.service.password = P@ssw0rd
+# --------------------------------------------------------------------------------------------------------
+

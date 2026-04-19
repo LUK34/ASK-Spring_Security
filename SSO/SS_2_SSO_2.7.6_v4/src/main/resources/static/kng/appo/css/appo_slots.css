@@ -1,0 +1,29 @@
+.appo-slot-module-header{
+    background-color:#558b2f;
+    color:#ffffff;
+    text-align:center;
+    font-size:20px;
+    font-weight:bold;
+    padding:12px;
+    margin-bottom:20px;
+    border-radius:4px;
+}
+
+
+.timeslot-box{
+    border:2px solid #558b2f;
+    color:#558b2f;
+    padding:12px;
+    text-align:center;
+    font-weight:bold;
+    font-size:16px;
+    border-radius:5px;
+    margin-bottom:15px;
+    background:#ffffff;
+}
+
+.timeslot-box:hover{
+    background-color:#558b2f;
+    color:white;
+    cursor:pointer;
+}

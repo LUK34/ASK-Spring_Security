@@ -1,0 +1,31 @@
+/* MODAL HEADER */
+.appo-modal-header{
+    background-color:#558b2f;
+    color:#ffffff;
+    text-align:center;
+}
+
+/* Modal Title Center */
+.appo-modal-header .modal-title{
+    color:#ffffff;
+    text-align:center;
+    width:100%;
+    font-weight:bold;
+}
+
+/* Footer Alignment */
+.appo-modal-footer{
+    text-align:center;
+}
+
+/* Submit Button */
+.appo-modal-submit-btn{
+    background-color:#558b2f;
+    color:#ffffff;
+    border:none;
+}
+
+.appo-modal-submit-btn:hover{
+    background-color:#4a7a27;
+    color:#ffffff;
+}

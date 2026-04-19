@@ -1,0 +1,716 @@
+/* ====================================================
+   GENERAL PAGE SETTINGS
+==================================================== */
+body {
+	background-color: #f8f9fa;
+	font-family: "Segoe UI", sans-serif;
+	margin-top: 118px; /* ,88px 78px prevent content from hiding under fixed navbar */
+	direction: rtl;   /* sidebar + page RTL */
+}
+html, body { overflow-x: hidden; }
+
+/* ====================================================
+   HEADER  (Logo Right, User Left)
+==================================================== */
+.kng-header {
+	background-color: #558b2f !important;
+	color: #fff;
+	height: 118px; /*88px, 78px*/
+	width: 100%;
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-pack: justify;
+	justify-content: space-between;
+	-ms-flex-align: center;
+	align-items: center;
+	padding: 0 20px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 100;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+	direction: rtl;      /* key: keeps logo on right, user info on left */
+	text-align: right;
+}
+
+/* ---------- Right Section (Logo) ---------- */
+.header-right {
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-align: center;
+	align-items: center;
+	gap: 15px;
+}
+.header-right img {
+	height: 78px;
+	width: 217px;
+	object-fit: contain;
+}
+.header-right .title-block h6 {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+}
+.header-right .title-block span {
+	font-size: 13px;
+	opacity: 0.9;
+}
+
+/* ---------- Left Section (User Info, Exit, Lang, Time) ---------- */
+.header-left {
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-align: center;
+	align-items: center;
+	direction:ltr;
+	gap: 15px;
+}
+
+/* Exit button */
+.exit-btn {
+	background-color: #4b5e00;
+	border: 1px solid #c8e6c9;
+	border-radius: 6px;
+	color: #fff;
+	padding: 4px 10px;
+	font-size: 13px;
+	text-decoration: none;
+}
+.exit-btn:hover { background-color: #3b4800; }
+
+/* Language selector */
+.lang-select {
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-align: center;
+	align-items: center;
+	gap: 5px;
+}
+.lang-select label {
+	color: #fff;
+	font-size: 14px;
+}
+.lang-select select {
+	border: none;
+	border-radius: 8px;
+	padding: 3px 6px;
+	font-size: 12px;
+	color: #333;
+	outline: none;
+}
+
+/* User section */
+.header-user {
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-align: center;
+	align-items: center;
+	gap: 12px;
+	direction: rtl; 
+}
+.header-user img {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	border: 1px solid #c8e6c9;
+	object-fit: cover;
+}
+.header-user .username {
+	font-size: 15px; /* 13px */
+	font-weight: 600;
+	color: #fff;
+	white-space: nowrap;       /* Prevent name + rank from wrapping */
+}
+
+.header-photo img {
+	width: 60px; /* 56px, 48px */
+	height: 60px; /*  56px, 48px */
+	border-radius: 50%; /* 50% */
+	border: 1px solid #c8e6c9;
+	object-fit: cover;
+}
+
+/* Clock & date */
+.header-datetime {
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-align: center;
+	align-items: center;
+	gap: 10px;
+	font-size: 13px;
+	color: #fff;
+	min-width: 130px;           /* Ensures stable spacing for time/date */
+	text-align: left;           /* Aligns time/date consistently on left */
+}
+
+/* ====================================================
+   SIDEBAR  (RTL ? right side)
+==================================================== */
+
+.container-fluid > .row {
+  margin-right: 0;
+  margin-left: 0;
+  padding-top: 0 !important;
+  align-items: stretch;
+}
+
+
+.sidebar,
+.content {
+  height: calc(100vh - 78px);
+  overflow-y: auto;
+  position: relative;
+  top: 0;
+  margin-top: 0 !important;
+}
+
+
+
+.sidebar {
+  /* position: relative;
+  top: 0;
+  height: calc(100vh - 90px);    
+  overflow-y: auto; */
+  border-left: 1px solid #dee2e6;
+  border-right: none;
+  padding: 15px;
+  background-color: #fff;
+}
+
+.content {
+  /*position: relative;
+  top: 0;
+  height: calc(100vh - 90px);
+  overflow-y: auto;*/
+  background-color: #fff;
+  padding: 10px 15px 15px 15px;
+  border-right: 1px solid #dee2e6;
+}
+
+.row::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+
+/* ====================================================
+   SEARCH BAR
+==================================================== */
+.search-bar input {
+	border-radius: 20px;
+	padding: 6px 12px;
+	border: 1px solid #ced4da;
+	width: 100%;
+	margin-bottom: 15px;
+}
+
+/* ====================================================
+   ACCORDION / PANEL (Bootstrap 3)
+==================================================== */
+.panel-heading {
+	position: relative;
+  	padding: 6px 10px;          /* more breathing space */
+ 	min-height: 52px !important;  /* 48px, 44px, 38px*/
+ 	line-height: 1.6 !important;
+	background-color: #fff !important;   /* pure white background */
+  	border-radius: 6px;
+   /* overflow: hidden; */
+}
+
+/* FINAL RTL + IE11 SAFE ANCHOR LAYOUT */
+.panel-heading > a {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -ms-flex-align: center;
+    align-items: center;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    width: 100%;
+
+    padding: 4px 8px;
+    direction: rtl;
+    text-align: right;
+}
+
+.panel-title > a {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-pack: justify;
+  justify-content: space-between;   /* creates left + right groups */
+  width: 100%;
+  text-decoration: none;
+  color: #212529;
+  background: #fff;
+
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+
+.kng-content-wrap{
+  width: 100%;
+  overflow-x: auto;      /* ✅ table hide nahi hoga */
+}
+
+.kng-content-wrap table{
+  width: 100%;
+  max-width: 100%;
+}
+
+.kng-content-wrap table{
+  white-space: nowrap;
+}
+
+
+/* emulate “gap” manually for IE11 */
+/*
+.panel-heading > a > * {
+  margin-right: 8px;
+}
+.panel-heading > a > *:last-child {
+  margin-right: 0;
+}
+*/
+
+
+.panel-title a {
+	display: block;
+	text-decoration: none;
+	color: #212529;
+	text-align: right;
+}
+.panel-title a:hover {
+	background-color: #f8f9fa;
+	text-decoration: none;
+}
+.panel-group .panel + .panel { margin-top: 6px; }
+.panel-heading h4 { margin: 0; }
+
+/* Caret / arrow icon */
+.caret-icon {
+	/*margin-left: 6px; */
+	color: #6c757d;
+	transition: transform 0.3s ease;
+	font-size: 13px;
+}
+.panel-title a.collapsed .fa-angle-down { transform: rotate(0deg); }
+.panel-title a[aria-expanded="true"] .fa-angle-down { transform: rotate(180deg); }
+
+/* Patient name & folder */
+.patient-name {
+	/*
+	font-weight: 500;
+	margin-left: 4px;
+	*/
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  
+  line-height: 1.6 !important;   /* ? FIX FOR IE */
+  padding-bottom: 2px !important; /* ? Extra breathing room */
+}
+.folder-icon { color: #9ccc65; }
+.panel-title a[aria-expanded="true"] .folder-icon { color: #558b2f; }
+
+.panel-title a[aria-expanded="true"] .caret-icon {
+  transform: rotate(180deg);
+}
+
+
+/* Panel body / list items */
+.panel-body a {
+	display: block;
+	width: 100%;
+	text-decoration: none;
+	color: #212529;
+	padding: 4px 0;
+	text-align: right;
+}
+.panel-body a:hover {
+	color: #33691e;
+	background-color: #f2f5f2;
+	border-radius: 4px;
+	padding-right: 4px;
+}
+.file-label {
+	font-weight: 400;
+	margin-right: 6px;
+}
+.file-icon {
+	color: #6c757d;
+	font-size: 14px;
+}
+
+.panel-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: #212529;
+  padding: 4px 8px;
+  direction: ltr;               /* ? Fix: keeps left?right layout */
+  text-align: left;
+}
+
+.panel-toggle:hover {
+  background-color: #f8f9fa;
+  text-decoration: none;
+}
+
+.panel-toggle::after,
+.panel-heading::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+
+/*
+.left-icons {
+    order: 1 !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+*/
+
+/*
+.right-content {
+    order: 2 !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+*/
+
+
+/* LEFT group (arrow + gender) */
+/*.
+left-icons {
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 4px; 
+  margin-right: auto;             
+}
+*/
+
+/* RIGHT group (name + folder) */
+/*
+.right-content {
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;                
+  text-align: right;
+}
+*/
+
+.panel-heading > a,
+.panel-title > a {
+    direction: ltr !important;       /* critical */
+    text-align: left !important;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: start !important;   /* IE11 fix */
+    align-items: flex-start !important; /*Chrome/Edge*/
+    /*align-items: center;*/
+
+    justify-content: flex-start !important;
+}
+
+
+
+.side-left {
+    order: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: auto;    /* PUSHES TO LEFT in LTR */
+}
+
+.side-right {
+    order: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;     /* PUSHES TO RIGHT in LTR */
+    text-align: right;
+}
+
+
+
+
+
+
+
+/* clear old float effects */
+/*
+.left-icons, .right-content, .panel-toggle {
+  float: none !important;
+}
+*/
+
+/* Remove Bootstrap 3 float interference */
+/*
+.panel-title a,
+.left-icons,
+.right-content {
+  float: none !important;
+}
+*/
+
+/* ====================================================
+   GENDER ICONS + BORDER COLORS
+==================================================== */
+/* Base neutral heading */
+
+
+/* Male */
+.header-male-border {
+  border: 3px solid #0d47a1 !important;
+  background-color: #fff !important;   /* remove blue tint */
+}
+.header-male-border:hover {
+  box-shadow: 0 0 8px rgba(13, 71, 161, 0.6);
+  background-color: #fff !important;   /* stays white on hover */
+}
+
+/* Female */
+.header-female-border {
+  border: 3px solid #c2185b !important;
+  background-color: #fff !important;   /* remove pink tint */
+}
+.header-female-border:hover {
+  box-shadow: 0 0 8px rgba(194, 24, 91, 0.6);
+  background-color: #fff !important;   /* stays white on hover */
+}
+
+/* Ensure no outer panel interference */
+.panel.panel-default {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+
+/* Gender icons (same color logic as before) */
+.gender-icon.male   { color: #1976d2; }
+.gender-icon.female { color: #e91e63; }
+
+
+.panel-title a * {
+  float: none !important;
+}
+
+/* ====================================================
+   RTL / IE11 SUPPORT UTILITIES
+==================================================== */
+.container-fluid, .row, .col-md-3.sidebar, .col-md-9.content {
+	height: auto;
+}
+#kngClock, #kngDate {
+	color: #fff;
+	font-size: 13px;
+}
+
+
+/* ================================================
+   FIX: Prevent sidebar & content from overlapping header
+   ================================================ */
+
+/* Push the whole main section below fixed header */
+.container-fluid {
+  margin-top: 0 !important;
+/*  padding-top: 78px !important;  */
+	padding-top: 20px !important;
+}
+
+
+
+/* Make sure main content also respects header height */
+.content-wrapper {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  min-height: calc(100vh - 78px);
+  background-color: #fff;
+}
+
+
+/* ---------------------------------------------------------------------------------------- */
+
+
+/* Ensure main content area aligns exactly with sidebar */
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 0 !important;     /* removes tiny top padding */
+  margin-top: 0 !important;
+}
+
+/* Neutralize Bootstrap's default spacing */
+.content > .content-wrapper,
+.content > div.dataTables_wrapper {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Remove DataTables’ own top margin if present */
+.dataTables_wrapper .row:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Adjust any h5/h4 or header titles inside content */
+.content h4,
+.content h5,
+.content h6 {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/*-------------------------------------------------------------------------------------*/
+/* =============================
+   APPOINTMENT DETAILS IN HEADER
+   ============================= */
+.header-appointment {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+
+    justify-content: flex-start;   /* FIXED ? keeps title + divider visible */
+    align-items: flex-start;
+
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+
+    color: #fff;
+    font-size: 14px;
+
+    min-width: 200px;
+    max-height: 124px;             /* FIXED ? avoids clipping inside 118px header */
+    overflow: visible;             /* FIXED ? show all rows */
+    direction: rtl;
+}
+
+/* Each row inside appointment block */
+.header-appointment .appt-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    text-align: right;
+    margin-bottom: 3px;
+    line-height: 1.4;
+}
+
+/* Label (right) */
+.header-appointment .appt-label {
+    font-weight: 900;
+    opacity: 0.95;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+/* Value (left) */
+.header-appointment .appt-value {
+    margin-right: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Title */
+.header-appointment .appt-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+    text-align: right;
+    width: 100%;
+    white-space: nowrap;
+}
+
+/* Divider line */
+.header-appointment .appt-divider {
+    width: 100%;
+    height: 2px;                  /* visible and clean */
+    background-color: #ffffff;
+    margin: 6px 0 8px 0;
+    flex-shrink: 0;               /* FIXED ? prevents disappearing */
+}
+/*-------------------------------------------------------------------------------------*/
+
+.chart-row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.chart-row > [class*='col-'] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/*-------------------------------------------------------------------------------------*/
+
+.module-link-ie {
+    text-decoration: none;
+    color: inherit;  
+    cursor: pointer;
+}
+
+.module-disabled-ie {
+    opacity: 0.6;
+    cursor: default;
+    /* prevent accidental click highlight */
+    pointer-events: none;
+}
+
+.module-link-ie:hover {
+    text-decoration: underline;
+}
+
+/*-------------------------------------------------------------------------------------*/
+
+.module-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 8px;
+    cursor: pointer;
+}
+
+.module-row:hover {
+    background-color: #f5f5f5;
+}
+
+/*-------------------------------------------------------------------------------------*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

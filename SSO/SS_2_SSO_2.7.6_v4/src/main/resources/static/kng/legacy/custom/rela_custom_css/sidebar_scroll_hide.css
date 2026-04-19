@@ -1,0 +1,19 @@
+/*-------------------------------------------------------------------------------------*/
+
+/* Allow vertical scroll only where needed */
+html {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Sidebar scrollbar containment */
+.sidebar {
+  overflow-x: hidden;
+}
+
+/* Prevent flex width miscalculation in Edge */
+.content {
+  overflow-x: hidden;
+}
+
+/*-------------------------------------------------------------------------------------*/

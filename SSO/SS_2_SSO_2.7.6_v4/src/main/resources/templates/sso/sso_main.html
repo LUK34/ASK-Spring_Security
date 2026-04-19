@@ -1,0 +1,43 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+ <!--  ########################################################################################################### -->
+	<div th:fragment="sso_main">
+			 <p th:text="'DEBUG: FLAG = ' + ${flag}" style="display:none;"></p>
+		<th:block th:switch="${flag}">
+          
+	        <th:block th:case="'sso_denied'">
+	            <div th:replace="sso/sso_denied :: sso_denied"></div>
+	        </th:block>
+		
+			 <th:block th:case="'sso_expired'">
+	            <div th:replace="sso/sso_expired :: sso_expired"></div>
+	        </th:block>
+		
+			<th:block th:case="'sso_failed'">
+	            <div th:replace="sso/sso_failed :: sso_failed"></div>
+	        </th:block>
+			
+			<th:block th:case="'sso_success'">
+	            <div th:replace="sso/sso_success :: sso_success"></div>
+	        </th:block>
+          
+          <th:block th:case="'sso_hr_failed'">
+	            <div th:replace="sso/sso_hr_failed :: sso_hr_failed"></div>
+	      </th:block>
+          
+          <th:block th:case="*">
+		    <div class="alert alert-danger text-center">
+		        <p>Unknown SSO state. Please contact IT Support.</p><br>
+		        <p><b>Help Line: 71174</b></p><br>
+		    </div>
+		 </th:block>
+         
+          
+        </th:block>
+	
+	
+	</div>
+ <!--  ########################################################################################################### -->
+ 
+ 
+</html>
