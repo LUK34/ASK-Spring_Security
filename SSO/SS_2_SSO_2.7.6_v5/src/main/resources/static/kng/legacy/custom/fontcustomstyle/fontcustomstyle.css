@@ -1,0 +1,81 @@
+/* ----------------------------------------------------------------------------------------------------------*/
+
+*.icon-white{color:white}
+*.icon-silver{color:silver}
+*.icon-green{color:green}
+*.icon-red{color:red}
+*.icon-dark{color:grey}
+*.icon-info{color:#17a2b8}
+
+
+/* ----------------------------------------------------------------------------------------------------------*/
+				/* MEDIA Queries */
+
+@media screen and (max-width:768px)
+{
+	/* small screen */
+	div.full-details{display: none}
+	div.less-details {display:block;}
+}
+
+@media screen and (min-width:768px) and (max-width:1024px)
+{
+	/* medium screen */
+	div.full-details {display:block;}	
+	div.less-details {display:none;}
+	.hideable-column { display:none }
+}
+
+
+@media screen and (min-width:1024px)
+{
+	/* large screen */
+	div.less-details {display:none;}
+	th, td .hideable-column { display:table-cell; }
+}
+
+/* ----------------------------------------------------------------------------------------------------------*/
+
+
+
+.navbar-brand img 
+{
+    width: 100px; /* Set this to the desired width */
+    height: auto; /* This will maintain the aspect ratio */
+}
+
+
+.margin-top-2 {
+    margin-top: 2px;
+}
+
+.margin-bottom-2 {
+    margin-bottom: 2px;
+}
+
+.margin-bottom-4 {
+    margin-bottom: 4px;
+}
+
+.margin-bottom-6 {
+    margin-bottom: 6px;
+}
+
+.margin-bottom-8 {
+    margin-bottom: 8px;
+}
+
+
+/* ----------------------------------------------------------------------------------------------------------*/
+
+				/* CODE not used */
+
+.large-button {
+    font-size: 16px; /* Larger text */
+    padding: 10px 20px; /* Larger padding */
+    border-radius: 5px; /* Optional: rounded corners */
+    border: 2px solid #17a2b8; /* Optional: thicker border with a custom color */
+}
+
+
+/* ----------------------------------------------------------------------------------------------------------*/

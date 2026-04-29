@@ -1,0 +1,2 @@
+
+var GENERAL_PANEL_VISIBILITY = {};

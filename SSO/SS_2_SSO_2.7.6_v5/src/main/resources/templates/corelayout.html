@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:attr="lang=${currentLang}">
+<head>
+<!-- ------------------------------------------------------------------------------------------------------------ -->
+  <th:block th:replace="shared/core_css :: core_css"></th:block>
+  <th:block th:replace="shared/core_css :: core_dt_css"></th:block>
+  <th:block th:replace="shared/core_css :: core_custom_css"></th:block>
+  <th:block th:replace="shared/core_css :: brt_custom_css"></th:block>
+  <th:block th:replace="shared/core_css :: appo_css"></th:block>
+  
+  <th:block th:replace="shared/core_css :: sso_css"></th:block>
+<!-- ------------------------------------------------------------------------------------------------------------ -->
+</head>
+
+<body>
+<div class="wrapper">
+ <!-- ------------------------------------------------------------------------------------------------------------ -->
+ <th:block th:replace="shared/core_header :: core_header"></th:block>
+ <!-- ------------------------------------------------------------------------------------------------------------ -->
+ 
+ <!-- Separate tabs header -->
+<th:block th:replace="shared/core_subheader_tabs :: core_subheader_tabs"></th:block>
+
+
+
+ <div class="container-fluid">
+    <div class="row" style="direction: ltr; text-align: right;">
+    
+      <!-- NEW LEFT NOTES SIDEBAR -->
+  <th:block th:replace="shared/core_left_sidebar :: core_left_sidebar"></th:block>
+		
+		<!-- ########################## PAGE CONTENT ########################## -->
+		<div class="col-md-9 content" id="mainContent" style="direction: ltr;">
+        	<div class="content-wrapper kng-content-wrap">
+      			<div layout:fragment="content">
+      			
+      			</div>
+    		</div>
+      	</div>
+      	<!-- ########################## PAGE CONTENT ########################## -->	
+		<th:block th:replace="shared/core_sidebar :: core_sidebar"></th:block>
+				
+			
+	</div>
+  </div>
+  <!-- ------------------------------------------------------------------------------------------------------------ -->
+ <th:block th:replace="shared/core_js :: core_js"></th:block>
+ <th:block th:replace="shared/core_js :: core_dt_js"></th:block>
+  <th:block th:replace="shared/core_js :: core_charts_js"></th:block>
+ <th:block th:replace="shared/core_js :: core_utils_js"></th:block>
+ <th:block th:replace="shared/core_js :: brt_utils_js"></th:block>
+ <th:block th:replace="shared/core_js :: appo_js"></th:block>
+ 
+ <th:block th:replace="shared/core_js :: sso_js"></th:block>
+ 
+ 
+ <!-- ------------------------------------------------------------------------------------------------------------ -->
+    <!-- Page-level scripts slot -->
+    <div layout:fragment="script">
+    	
+	    
+    </div>
+ <!-- ------------------------------------------------------------------------------------------------------------ -->
+</div>
+
+</body>
+</html>

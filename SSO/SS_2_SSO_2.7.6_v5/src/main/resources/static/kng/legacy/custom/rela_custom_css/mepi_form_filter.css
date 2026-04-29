@@ -1,0 +1,519 @@
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* CONTAINER START */
+/*--------------------------------------------------------------------------------------------------------------*/
+
+.ie-filter-container {
+    width: 100%;
+    display: table;
+    margin-top: 20px;
+    position: relative;
+}
+
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* CONTAINER END */
+/*--------------------------------------------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* LEFT HAND SIDE START */
+/*--------------------------------------------------------------------------------------------------------------*/
+.left-buttons-ie {
+    float: left;
+    margin-left: 40px;
+}
+
+/* Two columns */
+.left-buttons-ie .btn-col {
+    float: left;
+    width: 180px;       /* controls column width */
+    margin-right: 40px;
+}
+
+.left-buttons-ie button {
+    display: block;
+    margin-bottom: 5px;
+    width: 120px;
+}
+
+.left-buttons-ie label {
+    display: block;            /* One below another */
+    padding: 6px 10px;
+    cursor: pointer;
+    position: relative;
+}
+
+.left-buttons-ie .chk-ie {
+    float: right;              /* Checkbox moves to right side */
+    margin-top: 2px;
+}
+
+
+/* BUTTONS BASE */
+.btn-filter {
+    padding: 6px 14px;
+    background: white;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    border: 2px solid green; /* default green for 4 buttons */
+    color: green;
+}
+
+/* Individual Colors */
+.father-btn {
+    border: 2px solid black;
+    color: black;
+}
+
+.sons-btn {
+    border: 2px solid blue;
+    color: blue;
+}
+
+.green-btn {
+    border: 2px solid #558b2f;
+    color: #558b2f;
+}
+
+.grey-btn {
+    border: 2px solid grey;
+    color: grey;
+}
+
+.yellow-btn{
+	border: 2px solid #DBA400;
+    color: #DBA400;
+}
+
+
+.sky-blue-btn{
+	border: 2px solid #87CEEB;
+	color: #87CEEB;
+}
+
+
+.royal-blue-btn{
+	border: 2px solid #4169E1;
+	color: #4169E1;
+}
+
+
+.burgundy-btn{
+	border: 2px solid #AE002B;
+	color: #AE002B;
+}
+
+
+
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* LEFT HAND SIDE END */
+/*--------------------------------------------------------------------------------------------------------------*/
+
+
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* CENTER TAB (WIDER) START */
+/*--------------------------------------------------------------------------------------------------------------*/
+
+.green-tab-ie {
+	
+    display: inline-block;
+    background: #558b2f;
+    color: white;
+    padding: 12px 40px;
+    border-radius: 8px;
+    font-size: 18px;
+
+    /* REMOVE margin-left */
+    /* margin-left: 180px; */
+
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 15px; /* top: 10px, adjust up/down as needed */
+}
+
+.green-tab-ie span {
+    padding: 0 25px;
+    border-right: 1px solid rgba(255,255,255,0.5);
+}
+
+.green-tab-ie span:last-child {
+    border-right: none;
+}
+
+.green-tab-ie .tab-item {
+    padding: 0 25px;
+    cursor: pointer;
+    border-right: 1px solid rgba(255,255,255,0.5);
+}
+
+.green-tab-ie .tab-item:last-child {
+    border-right: none;
+}
+
+/* ACTIVE TAB STYLE */
+.tab-active {
+    background: white;
+    color: #558b2f !important;
+    border-radius: 6px;
+    padding: 6px 20px;
+}
+
+
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* CENTER TAB (WIDER) END */
+/*--------------------------------------------------------------------------------------------------------------*/
+
+
+/* RIGHT SIDE FORM (STACKED VERTICAL) */
+.right-form-ie {
+    float: right;
+    margin-right: 120px; /*margin-right: 40px;*/
+    /* text-align: left; */
+    width: 250px; /* width: 180px; */
+     margin-top: 20px; 
+}
+
+.field-item-ie.vertical {
+    margin-bottom: 15px;
+}
+
+.field-item-ie.vertical label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.field-item-ie.vertical input,
+.field-item-ie.vertical select {
+    width: 170px;
+    padding: 5px;
+}
+
+
+.form-row-ie {
+    margin-bottom: 12px;
+    white-space: nowrap; /* prevents wrapping in IE11 */
+}
+
+.form-row-ie label {
+    display: inline-block;
+    width: 90px; /* label width */
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.form-row-ie input,
+.form-row-ie select {
+    display: inline-block;
+    width: 140px;
+    padding: 5px;
+    vertical-align: middle;
+}
+
+/* Smaller width for FROM/TO input */
+.form-row-ie input.small {
+    width: 100px;
+}
+
+.form-row-ie.two-fields {
+    white-space: nowrap;
+    margin-bottom: 12px;
+}
+
+.form-row-ie.two-fields label {
+    display: inline-block;
+    width: 60px;
+}
+
+.form-row-ie.two-fields .to-label {
+    margin-left: 15px;  /* space between FROM and TO */
+}
+
+.form-row-ie.two-fields input.small {
+    width: 90px;
+    display: inline-block;
+}
+
+/* ROW WITH TWO FIELDS (FROM + TO) */
+.form-row-two {
+    white-space: nowrap;        /* keep everything on one line */
+    margin-bottom: 15px;
+}
+
+.form-row-two label {
+    display: inline-block;
+    width: 60px;               /* consistent label width */
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.form-row-two .to-label {
+    margin-left: 25px;         /* space between FROM and TO */
+    width: 40px !important;    /* override default label width */
+}
+
+.form-row-two input.small {
+    width: 100px;
+    padding: 4px;
+    vertical-align: middle;
+}
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* TREE STRUCTURE START */
+/*--------------------------------------------------------------------------------------------------------------*/
+/* Container for tree on the left */
+.left-tree-ie {
+    float: left;
+    width: 260px;
+    margin-left: 15px;
+    margin-top: 10px;
+}
+
+/* Absolute positioning inside container */
+.tree-wrapper {
+    position: relative;
+    width: 260px;
+    height: 300px;
+}
+
+/* STYLE of each box */
+.node {
+    position: absolute;
+    padding: 5px 14px;
+    border-radius: 6px;
+    background: white;
+    border: 2px solid green;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+/* Correct colors */
+.father { border-color: black; color: black; }
+.sons { border-color: blue; color: blue; }
+
+/* ------------------ POSITIONING AS PER DRAWING ------------------ */
+
+/* Father (top right of Persons) */
+.father {
+    top: 0px;
+    left: 150px;
+}
+
+/* Sons is slightly below Father */
+.sons {
+    top: 45px;
+    left: 160px;
+}
+
+/* Persons centered below them */
+.persons {
+    top: 115px;
+    left: 90px;
+}
+
+/* Soldiers comes DOWN from persons */
+.soldiers {
+    top: 175px;
+    left: 140px;
+}
+
+/* Retired is left & down from Soldiers */
+.retired {
+    top: 210px;
+    left: 40px;
+}
+
+/* Professionals below Retired */
+.professionals {
+    top: 260px;
+    left: 50px;
+}
+
+/* ------------------ LINES / CONNECTIONS ------------------ */
+
+/* Father → Persons */
+.father-to-persons {
+    position: absolute;
+    top: 35px;
+    left: 165px;
+    width: 2px;
+    height: 90px;
+    background: #000;
+    transform: rotate(30deg);
+}
+
+/* Sons → Persons */
+.sons-to-persons {
+    position: absolute;
+    top: 80px;
+    left: 175px;
+    width: 2px;
+    height: 45px;
+    background: #000;
+    transform: rotate(25deg);
+}
+
+/* Persons → Soldiers */
+.persons-to-soldiers {
+    position: absolute;
+    top: 145px;
+    left: 125px;
+    width: 2px;
+    height: 45px;
+    background: #000;
+    transform: rotate(25deg);
+}
+
+/* Soldiers → Retired */
+.soldiers-to-retired {
+    position: absolute;
+    top: 200px;
+    left: 120px;
+    width: 2px;
+    height: 50px;
+    background: #000;
+    transform: rotate(45deg);
+}
+
+/* Retired → Professionals */
+.retired-to-professionals {
+    position: absolute;
+    top: 240px;
+    left: 70px;
+    width: 2px;
+    height: 35px;
+    background: #000;
+}
+
+
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* TREE STRUCTURE END */
+/*--------------------------------------------------------------------------------------------------------------*/
+
+
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* SUBMIT BUTTON START */
+/*--------------------------------------------------------------------------------------------------------------*/
+
+/* SUBMIT BUTTON WRAPPER */
+.submit-btn-wrapper-ie 
+{
+    text-align: center;
+    margin-top: 20px;
+    clear: both; /* important to go below floated elements */
+}
+
+/* SUBMIT BUTTON STYLE (MATCHES GREEN TAB) */
+.green-submit-btn-ie 
+{
+    background: #558b2f;
+    color: white;
+    padding: 12px 40px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+/* SUBMIT search BUTTON STYLE (MATCHES GREEN TAB) */
+/* SUBMIT search BUTTON STYLE – medium-small */
+.green-submit-search-btn-ie.small {
+    background: #558b2f;
+    color: white;
+    padding: 6px 14px;      /* ⬅ slightly bigger */
+    font-size: 14px;        /* ⬅ better match with inputs */
+    border-radius: 5px;     /* ⬅ subtle rounding */
+    line-height: 1.3;
+}
+
+
+/* Hover (optional, safe for IE11) */
+.green-submit-btn-ie:hover 
+{
+    background: #006400; /* darker green */
+}
+
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* SUBMIT BUTTON END */
+/*--------------------------------------------------------------------------------------------------------------*/
+
+
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* NIGHT TAB DROPDOWN OPTIONS -> START */
+/*--------------------------------------------------------------------------------------------------------------*/
+
+/* FIX: Prevent inner spans from inheriting padding & border */
+
+/* .green-tab-ie .tab-item span { */
+.green-tab-ie .tab-item > span {
+    padding: 0;
+    border-right: none;
+}
+
+/* Night tab container */
+.tab-night {
+    position: relative;
+    display: inline-flex;      /* IMPORTANT */
+    align-items: center;
+}
+
+/* Arrow */
+.night-arrow {
+    margin-left: 6px;
+    cursor: pointer;
+    font-size: 18px;   /* 10px */
+    line-height: 1;
+}
+
+/* Dropdown */
+.night-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    list-style: none;
+    background: #558b2f; /*  #fff */
+    border: 1px solid #ccc;
+    padding: 0;
+    margin: 4px 0 0 0;
+    min-width: 170px;
+    z-index: 999;
+}
+
+.night-dropdown li {
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.night-dropdown li:hover {
+    background-color: #446f26;
+    color: #ffffff;
+}
+
+
+/* Selected dropdown option */
+.night-dropdown li.selected {
+    color: #ffffff;            /* WHITE text */
+    background-color: #558b2f; /* slightly darker green (optional) */
+}
+
+/*--------------------------------------------------------------------------------------------------------------*/
+									/* NIGHT TAB DROPDOWN OPTIONS -> END */
+/*--------------------------------------------------------------------------------------------------------------*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

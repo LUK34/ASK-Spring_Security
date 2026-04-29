@@ -1,0 +1,60 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!--  ########################################################################################################### -->
+<div th:fragment="content_ad_failed">
+			
+			<p><b>Please login using your ACTIVE DIRECTORY ACCOUNT</b> to access this application.</p>	  	  
+			<div th:replace="sso/content :: content_text"></div>
+	          
+</div>
+ <!--  ########################################################################################################### -->
+ 
+ 
+<!--  ########################################################################################################### -->
+<div th:fragment="content_hr_failed">
+			
+			<p><b>User logged in via ACTIVE DIRECTORY. But there is no data in HR system</b></p>	  		  
+			<div th:replace="sso/content :: content_text"></div>
+
+</div>
+<!--  ########################################################################################################### -->
+
+
+<!--  ########################################################################################################### -->
+<div th:fragment="content_denied">
+			
+			<p><b>SSO DENIED</b></p>	    
+			<div th:replace="sso/content :: content_text"></div>
+
+</div>
+<!--  ########################################################################################################### -->
+
+<!--  ########################################################################################################### -->
+<div th:fragment="content_expired">
+			
+			<p> Please close the browser and open it again to start a new SSO session.</p>
+
+</div>
+<!--  ########################################################################################################### -->
+
+
+<!--  ########################################################################################################### -->
+<div th:fragment="content_text">
+			
+			 <p><strong>Step 1:</strong>Please contact <b>Eng. SUMER</b></p>
+	         <p><b>Contact Info: +965 66238711</b></p>
+			 <br>
+	
+	         <p><strong>Step 2:</strong> If Eng. SUMER does not pick up the call, please contact KNG IT Support</p>
+	         <p><b>Help Line: 71174</b></p>
+		  	 <br>
+		  			 
+		  	 <p><strong>Step 3:</strong> If KNG IT Support does not pick up the call, please contact Mowfaq Abu Ali</p>
+	         <p><b>Contact Info: +965 55822224</b></p>
+	          <br>
+
+</div>
+<!--  ########################################################################################################### -->
+
+
+</html>

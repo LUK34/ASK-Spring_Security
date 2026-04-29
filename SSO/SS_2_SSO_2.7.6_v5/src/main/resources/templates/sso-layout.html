@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:attr="lang=${currentLang}">
+<head>
+<!-- ------------------------------------------------------------------------------------------------------------ -->
+  <th:block th:replace="shared/core_css :: core_css"></th:block>
+  <th:block th:replace="shared/core_css :: core_dt_css"></th:block>
+  <th:block th:replace="shared/core_css :: core_custom_css"></th:block>
+  <th:block th:replace="shared/core_css :: brt_custom_css"></th:block>
+  <th:block th:replace="shared/core_css :: appo_css"></th:block>
+  
+  <th:block th:replace="shared/core_css :: sso_css"></th:block>
+  
+<!-- ------------------------------------------------------------------------------------------------------------ -->
+</head>
+
+<body>
+<div class="wrapper">
+
+ <div class="container-fluid">
+    <div class="row" style="direction: ltr; text-align: right;">
+    
+    	<div layout:fragment="content"></div>
+     
+	</div>
+  </div>
+  <!-- ------------------------------------------------------------------------------------------------------------ -->
+ <th:block th:replace="shared/core_js :: core_js"></th:block>
+ <th:block th:replace="shared/core_js :: core_dt_js"></th:block>
+  <th:block th:replace="shared/core_js :: core_charts_js"></th:block>
+ <th:block th:replace="shared/core_js :: core_utils_js"></th:block>
+ <th:block th:replace="shared/core_js :: brt_utils_js"></th:block>
+ <th:block th:replace="shared/core_js :: appo_js"></th:block>
+ 
+ 
+ <th:block th:replace="shared/core_js :: sso_js"></th:block>
+ <!-- ------------------------------------------------------------------------------------------------------------ -->
+    <!-- Page-level scripts slot -->
+    <div layout:fragment="script">
+    	
+	    
+    </div>
+ <!-- ------------------------------------------------------------------------------------------------------------ -->
+</div>
+
+</body>
+</html>

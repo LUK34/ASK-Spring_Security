@@ -1,0 +1,33 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>SSO Denied</title>
+</head>
+
+
+ <!--  ########################################################################################################### -->
+	<div th:fragment="sso_denied">
+		  
+		  <section class="content sso-center-wrapper">
+			    <div class="panel panel-default sso-box">
+			
+			        <!-- Header -->
+			        <div class="panel-heading sso-header">
+			            SSO Denied
+			        </div>
+			
+			        <!-- Body -->
+			        <div class="panel-body sso-body">
+			        
+			         	<div th:replace="sso/content :: content_denied"></div>
+			        
+			        </div>
+			
+			    </div>
+			</section>
+	
+	
+	</div>
+ <!--  ########################################################################################################### -->
+ 
+ 
+</html>

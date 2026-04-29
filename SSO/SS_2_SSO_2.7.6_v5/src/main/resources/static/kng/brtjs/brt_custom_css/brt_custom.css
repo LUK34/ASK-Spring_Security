@@ -1,0 +1,96 @@
+/* =========================================================
+   Report UI – IE11 + Bootstrap 3.3.7
+   FIXES:
+   - Soft light-gray table borders
+   - Override Bootstrap table-bordered
+   - Override medas-linklist font-size (10px → 15px)
+   - Right-aligned report buttons
+========================================================= */
+
+
+/* ---------------------------------------------------------
+   1. SOFT / ALMOST INVISIBLE TABLE BORDERS
+--------------------------------------------------------- */
+
+/* Table outer border */
+.report-table {
+    border: 1px solid #e0e0e0 !important;
+    border-collapse: collapse;
+}
+
+/* Table cell borders */
+.report-table > tbody > tr > td {
+    border: 1px solid #e0e0e0 !important;
+    vertical-align: middle;
+    padding: 8px 12px;
+}
+
+
+/* ---------------------------------------------------------
+   2. RIGHT-ALIGN BUTTON CONTENT
+--------------------------------------------------------- */
+
+.report-btn-wrapper {
+    text-align: right;
+}
+
+
+/* ---------------------------------------------------------
+   3. OVERRIDE medas-linklist FOR REPORT BUTTONS ONLY
+--------------------------------------------------------- */
+
+.report-btn-wrapper .medas-linklist {
+    font-size: 16px !important;   /* <-- YOUR REQUEST */
+    font-weight: bold;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    color: #558b2f;
+}
+
+
+/* ---------------------------------------------------------
+   4. REPORT BUTTON LOOK (NO BORDER)
+--------------------------------------------------------- */
+
+.report-btn-wrapper .btn {
+    border: none !important;
+    box-shadow: none !important;
+    background-color: transparent;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+
+/* ---------------------------------------------------------
+   5. BUTTON HOVER / FOCUS EFFECT
+--------------------------------------------------------- */
+
+.report-btn-wrapper .btn:hover,
+.report-btn-wrapper .btn:focus {
+    background-color: rgba(85, 139, 47, 0.08);
+    outline: none;
+}
+
+
+/* ---------------------------------------------------------
+   6. OPTIONAL: RIGHT SPACING (VISUAL BALANCE)
+--------------------------------------------------------- */
+
+.report-btn-wrapper .btn {
+    margin-right: 10px;
+}
+
+
+/* =========================================================
+   MAKE REPORT TITLES MATCH REPORT BUTTONS
+========================================================= */
+
+/* Panel title inside report sections */
+.panel-heading .medas-linklist {
+    font-size: 16px !important;
+    font-weight: bold;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    color: #558b2f;
+}
+
+
+
