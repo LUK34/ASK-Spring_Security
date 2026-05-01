@@ -342,6 +342,18 @@ public class SsoServiceImpl implements SsoService
     	}
     	return use_me_mid;
 	}
+
+
+	@Override
+	public Long itehs_mid_use_me() 
+	{
+		System.out.println("SERVICE LAYER -> SSO SERVICE -> itehs_mid_use_me -> START");
+		Long mid1 = getLogged_SSO_MilitaryId();
+		Long use_me_mid = military_Id_Bypasser(mid1);
+		System.out.println("USE ME MILITARY NO: "+use_me_mid);
+		System.out.println("SERVICE LAYER -> SSO SERVICE -> itehs_mid_use_me -> END");
+		return use_me_mid;
+	}
 	
 												/* For general purpose used in ITEHS app -> END */
 	// ####################################################################################################################################################################

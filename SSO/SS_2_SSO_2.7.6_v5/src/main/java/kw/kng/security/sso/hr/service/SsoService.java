@@ -28,6 +28,8 @@ public interface SsoService
 												/* For general purpose used in ITEHS app -> START */
 	List<Long> getSsoMidListAsLong();
 	Long military_Id_Bypasser(Long militaryId);
+	Long itehs_mid_use_me();
+	
 												/* For general purpose used in ITEHS app -> END */											
 	// ####################################################################################################################################################################
 	
