@@ -45,6 +45,7 @@ public class SecurityConfig
             // Authorisation rules
             .authorizeRequests()
             .antMatchers(
+            	"/ora_func/**",
                 "/css/**",
                 "/js/**",
                 "/images/**",
