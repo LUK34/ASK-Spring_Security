@@ -9,6 +9,7 @@ public class HrFamilyDto {
 	private Long primaryId;
 	private Long civilId;
 	private Long militaryId;
+	private Long sysuid;
 	private String nameEn;
 	private String nameAr;
 	private String gender;

@@ -39,6 +39,7 @@ public class HrRepo
 			 	 h.setPrimaryId(rs.getLong("PRIMARY_ID"));
 		    	 h.setCivilId(rs.getLong("CIVIL_ID_NO"));
 		    	 h.setMilitaryId(rs.getLong("MILITARY_NO"));
+		    	 h.setSysuid(rs.getLong("SYSUID"));
 		    	 h.setNameEn(rs.getString("NAME_E"));
 		    	 h.setNameAr(rs.getString("NAME_A"));
 		    	 h.setGender(rs.getString("GENDER"));
@@ -86,6 +87,7 @@ public class HrRepo
 	    	 	hf.setPrimaryId(rs.getLong("PRIMARY_ID"));
 	    	 	hf.setCivilId(rs.getLong("CIVIL_ID_NO"));
 	    	 	hf.setMilitaryId(rs.getLong("MILITARY_NO"));
+	    	 	hf.setSysuid(rs.getLong("SYSUID"));
 	    	 	hf.setNameEn(rs.getString("NAME_E"));
 	    	 	hf.setNameAr(rs.getString("NAME_A"));
 	    	 	hf.setGender(rs.getString("GENDER"));
@@ -133,6 +135,7 @@ public class HrRepo
 	    	 	hf.setPrimaryId(rs.getLong("PRIMARY_ID"));
 	    	 	hf.setCivilId(rs.getLong("CIVIL_ID_NO"));
 	    	 	hf.setMilitaryId(rs.getLong("MILITARY_NO"));
+	    	 	hf.setSysuid(rs.getLong("SYSUID"));
 	    	 	hf.setNameEn(rs.getString("NAME_E"));
 	    	 	hf.setNameAr(rs.getString("NAME_A"));
 	    	 	hf.setGender(rs.getString("GENDER"));

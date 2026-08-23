@@ -17,6 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import kw.kng.security.sso.hr.dto.HrFamilyDto;
 import kw.kng.security.sso.hr.dto.SSoUserDto;
@@ -197,6 +199,107 @@ public class SsoServiceImpl implements SsoService
 		    }
 	}
 	
+	
+	@Override
+	public String getLogged_SSO_ClientIp()
+	{
+	    logger.info("================== SERVICE -> getLogged_SSO_ClientIp -> START ==================");
+
+	    ServletRequestAttributes attributes =
+	            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+	    if (attributes == null)
+	    {
+	        logger.warn("❌ Request attributes are NULL");
+	        return null;
+	    }
+
+	    HttpServletRequest request = attributes.getRequest();
+
+	    if (request == null)
+	    {
+	        logger.warn("❌ HTTP request is NULL");
+	        return null;
+	    }
+
+	    HttpSession session = request.getSession(false);
+
+	    if (session == null)
+	    {
+	        logger.warn("❌ HTTP session is NULL");
+	        return null;
+	    }
+
+	    Object clientIpObj = session.getAttribute("clientIp");
+
+	    if (clientIpObj == null)
+	    {
+	        logger.warn("❌ Client IP not found in session");
+	        return null;
+	    }
+
+	    String clientIp = clientIpObj.toString();
+
+	    logger.info("✅ Client IP resolved from session: {}", clientIp);
+	    logger.info("================== SERVICE -> getLogged_SSO_ClientIp -> END ==================");
+
+	    return clientIp;
+	}
+	
+	@Override
+	public String getLogged_SSO_ClientIpPattern()
+	{
+	    logger.info("================== SERVICE -> getLogged_SSO_ClientIpPattern -> START ==================");
+
+	    ServletRequestAttributes attributes =
+	            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+	    if (attributes == null)
+	    {
+	        logger.warn("❌ Request attributes are NULL");
+	        return null;
+	    }
+
+	    HttpServletRequest request = attributes.getRequest();
+
+	    if (request == null)
+	    {
+	        logger.warn("❌ HTTP request is NULL");
+	        return null;
+	    }
+
+	    HttpSession session = request.getSession(false);
+
+	    if (session == null)
+	    {
+	        logger.warn("❌ HTTP session is NULL");
+	        return null;
+	    }
+
+	    Object clientIpPatternObj =
+	            session.getAttribute("clientIpPattern");
+
+	    if (clientIpPatternObj == null)
+	    {
+	        logger.warn("❌ Client IP Pattern not found in session");
+	        return null;
+	    }
+
+	    String clientIpPattern =
+	            clientIpPatternObj.toString();
+
+	    logger.info(
+	        "✅ Client IP Pattern resolved from session: {}",
+	        clientIpPattern
+	    );
+
+	    logger.info("================== SERVICE -> getLogged_SSO_ClientIpPattern -> END ==================");
+
+	    return clientIpPattern;
+	}
+	
+	
+	
 	@Override
 	public void sso_header_details(Model model)
 	{
@@ -354,6 +457,12 @@ public class SsoServiceImpl implements SsoService
 		System.out.println("SERVICE LAYER -> SSO SERVICE -> itehs_mid_use_me -> END");
 		return use_me_mid;
 	}
+
+
+
+
+
+
 	
 												/* For general purpose used in ITEHS app -> END */
 	// ####################################################################################################################################################################

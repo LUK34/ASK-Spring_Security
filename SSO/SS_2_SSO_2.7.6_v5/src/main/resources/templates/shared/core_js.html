@@ -1,5 +1,26 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
+<!-- ########################################################################################################################################################## -->
+<th:block th:fragment="ie11_js">
+
+	 <script th:inline="javascript">
+        var IE11_contextPath = /*[[@{/}]]*/ '';
+        var IE11_sso_logged_mid = /*[[${sso_logged_mid}]]*/ null;
+        var IE11_sso_ip_addr = /*[[${sso_ip_addr}]]*/ null;
+        var IE11_sso_ip_addr_pattern = /*[[${sso_ip_addr_pattern}]]*/ null;
+        console.log("SSO LOGGED in Military Number:"+IE11_sso_logged_mid);
+        console.log("SSO LOGGED in IP Address :"+IE11_sso_ip_addr);
+        console.log("SSO LOGGED in IP Address Pattern :"+IE11_sso_ip_addr_pattern);
+    </script>
+
+	<!-- Custom IE11 utilities to be reused in PROJECTS -> START  -->
+	<script type="text/javascript" th:src="@{/kng/ie11_utils/js/ie11_utils.js}"></script>
+	<!-- Custom IE11 utilities to be reused in PROJECTS -> END  -->
+
+</th:block>
+<!-- ########################################################################################################################################################## -->
+
+
 <!-- --------------------------------------- COMMON JS used for RELATIVE LAYOUT START --------------------------------------- -->
 
 <th:block th:fragment="core_js">

@@ -26,6 +26,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import kw.kng.security.sso.hr.dto.HrFamilyDto;
+import kw.kng.security.sso.hr.service.ClientService;
 import kw.kng.security.sso.hr.service.HrService;
 
 
@@ -49,12 +50,15 @@ public class JespaAuthFilter extends OncePerRequestFilter
     
     private final HrService hs;
     private final SsoProps ssoProps;
+    private final ClientService cs;
 
     public JespaAuthFilter(HrService hs,
-    					   SsoProps ssoProps) 
+    					   SsoProps ssoProps,
+    					   ClientService cs) 
     {
         this.hs = hs;
         this.ssoProps=ssoProps;
+        this.cs=cs;
     }
     
     
@@ -154,6 +158,29 @@ public class JespaAuthFilter extends OncePerRequestFilter
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+            
+
+            // -------------------------------------------------------------
+            // Resolve Client IP
+            // -------------------------------------------------------------
+          
+            String clientIp = cs.getClientIp(request);
+            String clientIpPattern = cs.getClientIpPattern(clientIp);
+
+            // -------------------------------------------------------------
+            // Create / Get Session
+            // -------------------------------------------------------------
+            HttpSession session = request.getSession(true);
+
+            // -------------------------------------------------------------
+            // Store SSO details in Session
+            // -------------------------------------------------------------
+            session.setAttribute("militaryId", ssoProps.getSsoMid());
+            session.setAttribute("clientIp", clientIp);
+            session.setAttribute("clientIpPattern", clientIpPattern);
+
+            logger.info("DEV/TEST SSO Session -> Military ID: {}, Client IP: {}, Client IP Pattern: {}", ssoProps.getSsoMid(), clientIp, clientIpPattern);
+            
             filterChain.doFilter(request, response);
             return;
         }
@@ -224,6 +251,8 @@ public class JespaAuthFilter extends OncePerRequestFilter
         }
         // Clear retry flag once identity is visible
         request.getSession().removeAttribute(NTLM_PRINCIPAL_RETRY_FLAG);
+        String clientIp = cs.getClientIp(request);
+        String clientIpPattern = cs.getClientIpPattern(clientIp);
         logger.info("JESPA Identity resolved: {}", fullUsername);
 
         logger.info("=======================================================");
@@ -231,6 +260,7 @@ public class JespaAuthFilter extends OncePerRequestFilter
         logger.info("Principal: {}", request.getUserPrincipal());
         logger.info("RemoteUser: {}", request.getRemoteUser());
         logger.info("AuthType: {}", request.getAuthType());
+        logger.info("Client IP Address: {}", clientIp);
         logger.info("=======================================================");
         
         logger.info("=======================================================");
@@ -256,7 +286,6 @@ public class JespaAuthFilter extends OncePerRequestFilter
         }
         
         Long militaryId = extractMilitaryId(extractedUsername);
-        Long effectiveMilitaryId = military_Id_Bypasser(militaryId);
         
         if (militaryId == null) 
         {
@@ -265,11 +294,18 @@ public class JespaAuthFilter extends OncePerRequestFilter
             response.sendRedirect(request.getContextPath() + "/sso-failed");
             return;   
         }
-
+        
+        Long effectiveMilitaryId = military_Id_Bypasser(militaryId);
+        
         // Now create session only for valid identity
         HttpSession session = request.getSession(true);
         session.setAttribute("militaryId", effectiveMilitaryId);
-
+        session.setAttribute("clientIp", clientIp);
+        session.setAttribute("clientIpPattern", clientIpPattern);
+        
+        
+        logger.info("SSO Session Initialized -> Military ID: {}, Client IP: {}, Client IP Pattern: {}",  effectiveMilitaryId, clientIp, clientIpPattern);
+        
         if (session.getAttribute("hrFamilyList") == null)
         {
             try 
@@ -337,9 +373,7 @@ public class JespaAuthFilter extends OncePerRequestFilter
         logger.info("Spring Security Context Updated -> ROLE_USER from IN MEMORY assigned");
 
         logger.info("Spring Security Context set. principal={}, roles={}", effectiveMilitaryId, authorities);
-        logger.info("Principal={}, Authorities={}",
-                authentication.getPrincipal(),
-                authentication.getAuthorities());
+        logger.info("Principal={}, Authorities={}", authentication.getPrincipal(), authentication.getAuthorities());
         
         
         logger.info("==== SPRING SSO FILTER END ====");

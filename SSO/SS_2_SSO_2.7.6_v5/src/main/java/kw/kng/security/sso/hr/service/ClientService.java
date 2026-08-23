@@ -5,5 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 public interface ClientService 
 {
 	String getClientIp(HttpServletRequest request);
+	String getClientIpPattern(String clientIp);
 
 }

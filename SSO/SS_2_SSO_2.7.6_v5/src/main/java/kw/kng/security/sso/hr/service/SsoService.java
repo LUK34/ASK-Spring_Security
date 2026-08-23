@@ -20,6 +20,8 @@ public interface SsoService
 	void nutrio_sso_header_details(Integer mid, Model model);
 	
 	Long getLogged_SSO_MilitaryId();
+	String getLogged_SSO_ClientIp();
+	String getLogged_SSO_ClientIpPattern();
 	void sso_header_details(Model model);
 											/* For NUTRIO App -> END */
 	// ####################################################################################################################################################################

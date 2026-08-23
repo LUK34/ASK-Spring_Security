@@ -9,15 +9,17 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 
 import kw.kng.security.sso.hr.service.HrService;
+import kw.kng.security.sso.hr.service.ClientService;
+
 
 @Configuration
 public class SecurityConfig 
 {
 
 	@Bean
-	public JespaAuthFilter jespaAuthFilter(HrService hs,SsoProps ssoProps)
+	public JespaAuthFilter jespaAuthFilter(HrService hs,SsoProps ssoProps,ClientService cs)
 	{
-		return new JespaAuthFilter(hs,ssoProps);
+		return new JespaAuthFilter(hs,ssoProps,cs);
 	}
 	
     @Bean
