@@ -116,7 +116,7 @@ URL: localhost:8080/hello
 ```
 URL: localhost:8080/login
 Username: user
-Passwrod: hello_world
+Password: hello_world
 ```
 - 8. ** ---- IMPORTANT ----**
 - Same as step 5. But we add username also.
@@ -132,7 +132,7 @@ URL: localhost:8080/hello
 ```
 URL: localhost:8080/login
 Username: hello
-Passwrod: hello_world
+Password: hello_world
 ```
 ***
 
