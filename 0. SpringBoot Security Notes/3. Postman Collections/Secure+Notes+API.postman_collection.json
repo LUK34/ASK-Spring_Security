@@ -1,0 +1,838 @@
+{
+	"info": {
+		"_postman_id": "76c8b428-26c0-4fb4-b740-0abd9a3debc8",
+		"name": "Secure Notes API",
+		"description": "Collection for Secure Notes API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28392683"
+	},
+	"item": [
+		{
+			"name": "Notes",
+			"item": [
+				{
+					"name": "Create Note",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDUyNDI0MCwiZXhwIjoxNzIwNjk3MDQwfQ.F6dZFmXLSo2vOEw5B4NpYHcjKVXM6IsDjPm1qof6pjw"
+							},
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "VO2JC6UsNC8vJmvbhsz71XaZ5_aJoLlak6eMiA8DtvDoh_MCNti4PZAYABgCE1Ls4OHPtkSqype5xIB38cLu7m1hgMaKtMU2",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"content\": \"Your note content here\"}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/notes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Notes",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDQ0MzY5NCwiZXhwIjoxNzIwNjE2NDk0fQ.y2fwV_rmOzIWFcWiIT9miOA-UcMj2Rp-QJiu3Q-e4vM"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/notes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CSRF Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46cGFzc3dvcmQ=",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/csrf-token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"csrf-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Note",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDUyNDI0MCwiZXhwIjoxNzIwNjk3MDQwfQ.F6dZFmXLSo2vOEw5B4NpYHcjKVXM6IsDjPm1qof6pjw"
+							},
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "VO2JC6UsNC8vJmvbhsz71XaZ5_aJoLlak6eMiA8DtvDoh_MCNti4PZAYABgCE1Ls4OHPtkSqype5xIB38cLu7m1hgMaKtMU2",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"content\": \"Updated note content here\"}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/notes/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notes",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Note",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDUyNDI0MCwiZXhwIjoxNzIwNjk3MDQwfQ.F6dZFmXLSo2vOEw5B4NpYHcjKVXM6IsDjPm1qof6pjw"
+							},
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "VO2JC6UsNC8vJmvbhsz71XaZ5_aJoLlak6eMiA8DtvDoh_MCNti4PZAYABgCE1Ls4OHPtkSqype5xIB38cLu7m1hgMaKtMU2",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/notes/32",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"notes",
+								"32"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "VO2JC6UsNC8vJmvbhsz71XaZ5_aJoLlak6eMiA8DtvDoh_MCNti4PZAYABgCE1Ls4OHPtkSqype5xIB38cLu7m1hgMaKtMU2",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDUyNDI0MCwiZXhwIjoxNzIwNjk3MDQwfQ.F6dZFmXLSo2vOEw5B4NpYHcjKVXM6IsDjPm1qof6pjw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/getusers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"getusers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Role",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password1",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "user1",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/update-role?userId=1&roleName=ROLE_USER",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"update-role"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "1"
+								},
+								{
+									"key": "roleName",
+									"value": "ROLE_USER"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "user1",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "password1",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/user/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"user",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Account Lock Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "mNdK1V6oz0jZZhd86aNEk8gWLs0oyBhagIkNt__5qJbHtLcKrbR4sD-Z_Xn0XnNN2I5wqq5wA6wcqSB34u1shcqfzaWj0II-",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDYwNjU4OSwiZXhwIjoxNzIwNzc5Mzg5fQ.qe6I3FcUQvXaF3WpFsSyuDEOpZF_YyKb1_H5WoUnX_0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/update-lock-status?userId=3&lock=false",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"update-lock-status"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "3"
+								},
+								{
+									"key": "lock",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "mNdK1V6oz0jZZhd86aNEk8gWLs0oyBhagIkNt__5qJbHtLcKrbR4sD-Z_Xn0XnNN2I5wqq5wA6wcqSB34u1shcqfzaWj0II-",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDYwNjU4OSwiZXhwIjoxNzIwNzc5Mzg5fQ.qe6I3FcUQvXaF3WpFsSyuDEOpZF_YyKb1_H5WoUnX_0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/roles",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"roles"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Account Expiry Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "mNdK1V6oz0jZZhd86aNEk8gWLs0oyBhagIkNt__5qJbHtLcKrbR4sD-Z_Xn0XnNN2I5wqq5wA6wcqSB34u1shcqfzaWj0II-",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDYwNjU4OSwiZXhwIjoxNzIwNzc5Mzg5fQ.qe6I3FcUQvXaF3WpFsSyuDEOpZF_YyKb1_H5WoUnX_0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/update-expiry-status?userId=3&expire=false",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"update-expiry-status"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "3"
+								},
+								{
+									"key": "expire",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Account Enabled Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "mNdK1V6oz0jZZhd86aNEk8gWLs0oyBhagIkNt__5qJbHtLcKrbR4sD-Z_Xn0XnNN2I5wqq5wA6wcqSB34u1shcqfzaWj0II-",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDYwNjU4OSwiZXhwIjoxNzIwNzc5Mzg5fQ.qe6I3FcUQvXaF3WpFsSyuDEOpZF_YyKb1_H5WoUnX_0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/update-enabled-status?userId=3&enabled=true",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"update-enabled-status"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "3"
+								},
+								{
+									"key": "enabled",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Credentials Expiry Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "mNdK1V6oz0jZZhd86aNEk8gWLs0oyBhagIkNt__5qJbHtLcKrbR4sD-Z_Xn0XnNN2I5wqq5wA6wcqSB34u1shcqfzaWj0II-",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDYwNjU4OSwiZXhwIjoxNzIwNzc5Mzg5fQ.qe6I3FcUQvXaF3WpFsSyuDEOpZF_YyKb1_H5WoUnX_0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/update-credentials-expiry-status?userId=3&expire=false",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"update-credentials-expiry-status"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "3"
+								},
+								{
+									"key": "expire",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "mNdK1V6oz0jZZhd86aNEk8gWLs0oyBhagIkNt__5qJbHtLcKrbR4sD-Z_Xn0XnNN2I5wqq5wA6wcqSB34u1shcqfzaWj0II-",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDYwNjU4OSwiZXhwIjoxNzIwNzc5Mzg5fQ.qe6I3FcUQvXaF3WpFsSyuDEOpZF_YyKb1_H5WoUnX_0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/admin/update-password?userId=3&password=password1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"update-password"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "3"
+								},
+								{
+									"key": "password",
+									"value": "password1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Signin",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"username\": \"courses.faisal\", \"password\": \"newpassword2\"}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/public/signin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"public",
+								"signin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signup",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"courses.faisal\", \r\n    \"email\": \"courses.faisal@gmail.com\", \r\n    \"password\": \"courses.faisal\", \r\n    \"role\": [\"user\"]\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/public/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"public",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTcxOTY0OTk3MiwiZXhwIjoxNzE5ODIyNzcyfQ.gMieucnvVG6eyZyxikdVimOVxJnrBGrFBm3r7uJCi5Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/auth/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Username",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTcxOTY0OTk3MiwiZXhwIjoxNzE5ODIyNzcyfQ.gMieucnvVG6eyZyxikdVimOVxJnrBGrFBm3r7uJCi5Y",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/auth/username",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"username"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Password Reset",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/auth/public/forgot-password?email=courses.faisal@gmail.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"public",
+								"forgot-password"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "courses.faisal@gmail.com"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Password Reset",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/auth/public/reset-password?token=d09a5f02-f645-4a26-a4cf-4265b3fa6b83&newPassword=newpassword123",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"public",
+								"reset-password"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "d09a5f02-f645-4a26-a4cf-4265b3fa6b83"
+								},
+								{
+									"key": "newPassword",
+									"value": "newpassword123"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Audit Log",
+			"item": [
+				{
+					"name": "Get All Audit Logs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDUyNDI0MCwiZXhwIjoxNzIwNjk3MDQwfQ.F6dZFmXLSo2vOEw5B4NpYHcjKVXM6IsDjPm1qof6pjw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/audit",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"audit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Audit Logs For a Note",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcyMDUyNDI0MCwiZXhwIjoxNzIwNjk3MDQwfQ.F6dZFmXLSo2vOEw5B4NpYHcjKVXM6IsDjPm1qof6pjw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/audit/note/32",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"audit",
+								"note",
+								"32"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
