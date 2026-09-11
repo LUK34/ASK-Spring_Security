@@ -1,6 +1,6 @@
 package kw.kng.prerequisites.config;
 
-import java.net.InetAddress;
+import java.util.Arrays;
 
 import javax.annotation.PostConstruct;
 
@@ -9,56 +9,57 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 @Configuration
 @ConditionalOnProperty(
         prefix = "kng.prerequisites",
-        name = "startup.enabled",
+        name = {
+                "startup.enabled",
+                "application.enabled"
+        },
         havingValue = "true",
         matchIfMissing = false
 )
-public class StartupLogger {
+public class ApplicationChecker {
 
     private static final Logger logger =
-            LoggerFactory.getLogger(StartupLogger.class);
+            LoggerFactory.getLogger(ApplicationChecker.class);
+
+    private final Environment environment;
 
     @Value("${spring.application.name:UNKNOWN}")
     private String applicationName;
 
+    public ApplicationChecker(Environment environment) {
+        this.environment = environment;
+    }
+
     @PostConstruct
-    public void logStartup() {
+    public void checkApplication() {
 
         logger.info("#############################################################################################");
-        logger.info("---------------------------------- STARTUP LOGGER -------------------------------------------");
+        logger.info("-------------------------------- APPLICATION CHECKER ----------------------------------------");
         logger.info("#############################################################################################");
-
-        logger.info(">>> Application       : {}", applicationName);
 
         logger.info(
-                ">>> Java Version      : {}",
-                System.getProperty("java.version"));
+                ">>> Application Name : {}",
+                applicationName);
 
-        try {
+        String[] profiles =
+                environment.getActiveProfiles();
 
-            InetAddress host =
-                    InetAddress.getLocalHost();
-
-            logger.info(
-                    ">>> Host Name         : {}",
-                    host.getHostName());
+        if (profiles != null && profiles.length > 0) {
 
             logger.info(
-                    ">>> Host IP           : {}",
-                    host.getHostAddress());
+                    ">>> Active Profiles  : {}",
+                    Arrays.toString(profiles));
 
-        } catch (Exception e) {
+        } else {
 
-            logger.warn(
-                    ">>> Host Information  : UNAVAILABLE",
-                    e);
+            logger.info(
+                    ">>> Active Profiles  : DEFAULT");
         }
-
-        logger.info(">>> Application Started Successfully");
 
         logger.info("#############################################################################################");
     }

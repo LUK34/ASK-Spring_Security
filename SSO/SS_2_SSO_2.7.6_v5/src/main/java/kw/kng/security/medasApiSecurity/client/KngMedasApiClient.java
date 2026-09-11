@@ -1,7 +1,10 @@
 package kw.kng.security.medasApiSecurity.client;
 
 import java.util.Collections;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +18,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import kw.kng.security.medasApiSecurity.config.KngMedasApiProperties;
 import kw.kng.security.medasApiSecurity.endpoint.KngMedasEndpointResolver;
 import kw.kng.security.medasApiSecurity.token.KngMedasTokenService;
 
@@ -23,567 +27,626 @@ import kw.kng.security.medasApiSecurity.token.KngMedasTokenService;
  * KNG MEDAS REST API.
  *
  * <p>
- * This class hides HTTP communication, JWT handling and runtime failover
- * details from the application business/service layer.
+ * PRIMARY ROUTE:
+ * PATMRD -> API Gateway -> Eureka -> KNG MEDAS REST
  * </p>
  *
  * <p>
- * High-level flow:
+ * SECONDARY ROUTE:
+ * PATMRD -> Direct MEDAS PRIME / fallback servers
  * </p>
  *
- * <pre>
- * PATMRD Service
- *      |
- *      v
- * KngMedasApiClient
- *      |
- *      +-- KngMedasTokenService
- *      |       -> obtains / caches / invalidates JWT
- *      |
- *      +-- KngMedasEndpointResolver
- *      |       -> tracks the active MEDAS server
- *      |
- *      +-- kngMedasRestTemplate
- *              -> executes the HTTP request
- *      |
- *      v
- * KNG MEDAS REST API
- * </pre>
- *
  * <p>
- * IMPORTANT FAILOVER RULE:
- * GET requests may be retried after an availability failure because they are
- * read operations. POST, PUT and DELETE requests are NOT automatically
- * replayed after an uncertain network/server failure because the first server
- * may already have committed the database change.
+ * IMPORTANT WRITE-SAFETY RULE:
+ * GET requests may be replayed through the direct route after a Gateway
+ * availability failure because GET is a read operation.
+ * POST, PUT and DELETE are NOT automatically replayed after an uncertain
+ * Gateway/network/server failure because the original request may already
+ * have reached MEDAS and modified data.
  * </p>
  */
 @Component
-public class KngMedasApiClient 
-{
-	/*
-	 * Dedicated RestTemplate configured for KNG MEDAS REST API communication.
-	 * Connect/read timeout values are configured in KngMedasApiConfig.
-	 */
-	private final RestTemplate restTemplate;
-	/*
-	 * Handles the JWT lifecycle used for server-to-server authentication.
-	 */
-	private final KngMedasTokenService tokenService;
-	/*
-	 * Maintains the currently active KNG MEDAS server and supports
-	 * prime -> fallback server resolution.
-	 */
-	private final KngMedasEndpointResolver endpointResolver;
+public class KngMedasApiClient {
 
-	/**
-	 * Constructor injection for the MEDAS HTTP client dependencies.
-	 *
-	 * @param restTemplate dedicated KNG MEDAS RestTemplate
-	 * @param tokenService JWT token service
-	 * @param endpointResolver active/fallback MEDAS endpoint resolver
-	 */
-	public KngMedasApiClient(@Qualifier("kngMedasRestTemplate") RestTemplate restTemplate,
-			KngMedasTokenService tokenService, KngMedasEndpointResolver endpointResolver) {
-		this.restTemplate = restTemplate;
-		this.tokenService = tokenService;
-		this.endpointResolver = endpointResolver;
-	}
+    private static final Logger log = LoggerFactory.getLogger(KngMedasApiClient.class);
 
-	// ############################################################################################################
-	// GENERIC REST API METHODS
-	// ############################################################################################################
+    private final RestTemplate restTemplate;
+    private final KngMedasTokenService tokenService;
+    private final KngMedasEndpointResolver endpointResolver;
+    private final KngMedasApiProperties properties;
 
-	/**
-	 * Executes a GET request against the currently active KNG MEDAS REST API
-	 * server.
-	 *
-	 * Runtime failover behaviour:
-	 *
-	 * 1. Use currently active MEDAS server.
-	 * 2. If JWT is rejected with 401, refresh JWT and retry once.
-	 * 3. If the active server is unavailable, invalidate that server and JWT.
-	 * 4. Authentication searches PRIME -> fallbacks again.
-	 * 5. Retry the GET once against the newly selected server.
-	 */
-	public <T> T get(String endpoint, Class<T> responseType)
-	{
-	    try
-	    {
-	        return executeGet(endpoint, responseType);
-	    }
-	    catch (HttpClientErrorException.Unauthorized ex)
-	    {
-	        /*
-	         * Server responded, but cached JWT is no longer accepted.
-	         * Refresh JWT and retry once.
-	         */
-	        tokenService.invalidateToken();
+    public KngMedasApiClient(
+            @Qualifier("kngMedasRestTemplate") RestTemplate restTemplate,
+            KngMedasTokenService tokenService,
+            KngMedasEndpointResolver endpointResolver,
+            KngMedasApiProperties properties) {
 
-	        return executeGet(endpoint, responseType);
-	    }
-	    catch (HttpClientErrorException ex)
-	    {
-	        /*
-	         * Other 4xx responses prove that MEDAS responded.
-	         *
-	         * These normally indicate request/security/business problems.
-	         * Do NOT switch servers.
-	         */
-	        throw ex;
-	    }
-	    catch (HttpServerErrorException ex)
-	    {
-	        /*
-	         * Fail over only for infrastructure/service availability errors.
-	         */
-	        if (isAvailabilityServerError(ex))
-	        {
-	            return retryGetAfterServerFailure(
-	                    endpoint,
-	                    responseType);
-	        }
+        this.restTemplate = restTemplate;
+        this.tokenService = tokenService;
+        this.endpointResolver = endpointResolver;
+        this.properties = properties;
+    }
 
-	        /*
-	         * A normal HTTP 500 can represent application,
-	         * database or business logic failure.
-	         */
-	        throw ex;
-	    }
-	    catch (ResourceAccessException ex)
-	    {
-	        /*
-	         * Connection refused,
-	         * connection timeout,
-	         * read timeout,
-	         * host unreachable, etc.
-	         */
-	        return retryGetAfterServerFailure(
-	                endpoint,
-	                responseType);
-	    }
-	}
+    // ############################################################################################################
+    // PUBLIC REST API METHODS
+    // ############################################################################################################
 
+    /**
+     * Executes GET using Gateway first. If Gateway is unavailable through
+     * network failure or 502/503/504, the request is safely retried through
+     * the existing direct MEDAS failover chain.
+     */
+    public <T> T get(String endpoint, Class<T> responseType) {
 
-	/**
-	 * Executes POST.
-	 *
-	 * POST is NOT automatically replayed after server/network failure
-	 * because the original request may already have modified data.
-	 */
-	public <T, R> R post(
-	        String endpoint,
-	        T requestBody,
-	        Class<R> responseType)
-	{
-	    try
-	    {
-	        return executePost(
-	                endpoint,
-	                requestBody,
-	                responseType);
-	    }
-	    catch (HttpClientErrorException.Unauthorized ex)
-	    {
-	        /*
-	         * Server responded successfully at network level.
-	         * Only JWT authentication failed.
-	         */
-	        tokenService.invalidateToken();
+        String gatewayBaseUrl = properties.getGatewayBaseUrl();
 
-	        return executePost(
-	                endpoint,
-	                requestBody,
-	                responseType);
-	    }
-	    catch (HttpClientErrorException ex)
-	    {
-	        /*
-	         * All other 4xx responses prove that MEDAS responded.
-	         *
-	         * Examples:
-	         * 400 - bad request
-	         * 403 - forbidden
-	         * 404 - resource/endpoint not found
-	         *
-	         * Do NOT switch servers.
-	         */
-	        throw ex;
-	    }
-	    catch (HttpServerErrorException ex)
-	    {
-	        /*
-	         * Only treat infrastructure-related 5xx statuses
-	         * as server availability failures.
-	         */
-	        if (isAvailabilityServerError(ex))
-	        {
-	            throw handleUnsafeRequestServerFailure(
-	                    "POST",
-	                    endpoint,
-	                    ex);
-	        }
+        if (gatewayBaseUrl != null) {
+            try {
+                log.info("Executing KNG MEDAS GET through API Gateway. Endpoint: {}", endpoint);
 
-	        /*
-	         * HTTP 500 may be application/database/business failure.
-	         */
-	        throw ex;
-	    }
-	    catch (ResourceAccessException ex)
-	    {
-	        /*
-	         * The request outcome may be unknown.
-	         *
-	         * Invalidate the server/JWT but DO NOT replay POST,
-	         * because that could create duplicate data.
-	         */
-	        throw handleUnsafeRequestServerFailure(
-	                "POST",
-	                endpoint,
-	                ex);
-	    }
-	}
+                return executeGetWithUnauthorizedRetry(
+                        buildUrl(gatewayBaseUrl, endpoint),
+                        responseType);
 
+            } catch (HttpClientErrorException ex) {
+                // 400 / 401 after refresh / 403 / 404 etc. are not availability failures.
+                throw ex;
 
-	/**
-	 * Executes PUT.
-	 *
-	 * PUT is NOT automatically replayed after an uncertain
-	 * network/server failure.
-	 */
-	public <T, R> R put(
-	        String endpoint,
-	        T requestBody,
-	        Class<R> responseType)
-	{
-	    try
-	    {
-	        return executePut(
-	                endpoint,
-	                requestBody,
-	                responseType);
-	    }
-	    catch (HttpClientErrorException.Unauthorized ex)
-	    {
-	        tokenService.invalidateToken();
+            } catch (HttpServerErrorException ex) {
+                if (!isAvailabilityServerError(ex)) {
+                    throw ex;
+                }
 
-	        return executePut(
-	                endpoint,
-	                requestBody,
-	                responseType);
-	    }
-	    catch (HttpClientErrorException ex)
-	    {
-	        /*
-	         * MEDAS responded with a 4xx.
-	         *
-	         * Do NOT fail over.
-	         */
-	        throw ex;
-	    }
-	    catch (HttpServerErrorException ex)
-	    {
-	        if (isAvailabilityServerError(ex))
-	        {
-	            throw handleUnsafeRequestServerFailure(
-	                    "PUT",
-	                    endpoint,
-	                    ex);
-	        }
+                log.warn(
+                        "KNG MEDAS API Gateway returned infrastructure error {} for GET endpoint {}. "
+                                + "Switching to direct MEDAS failover.",
+                        ex.getStatusCode(),
+                        endpoint);
 
-	        /*
-	         * Do not interpret every HTTP 500 as server failure.
-	         */
-	        throw ex;
-	    }
-	    catch (ResourceAccessException ex)
-	    {
-	        /*
-	         * PUT may already have been processed by the original server.
-	         * Do not automatically replay it.
-	         */
-	        throw handleUnsafeRequestServerFailure(
-	                "PUT",
-	                endpoint,
-	                ex);
-	    }
-	}
+            } catch (ResourceAccessException ex) {
+                log.warn(
+                        "KNG MEDAS API Gateway is unavailable for GET endpoint {}. "
+                                + "Switching to direct MEDAS failover. Cause: {}",
+                        endpoint,
+                        ex.getMessage());
+            }
+        } else {
+            log.warn(
+                    "KNG MEDAS API Gateway is disabled or not configured. "
+                            + "Executing GET through direct MEDAS failover. Endpoint: {}",
+                    endpoint);
+        }
 
+        return executeDirectGetWithFailover(endpoint, responseType);
+    }
 
-	/**
-	 * Executes DELETE.
-	 *
-	 * DELETE is NOT automatically replayed after an uncertain
-	 * network/server failure.
-	 */
-	public void delete(String endpoint)
-	{
-	    try
-	    {
-	        executeDelete(endpoint);
-	    }
-	    catch (HttpClientErrorException.Unauthorized ex)
-	    {
-	        tokenService.invalidateToken();
+    /**
+     * Executes POST through Gateway when configured.
+     *
+     * POST is deliberately NOT replayed through the direct route after an
+     * uncertain Gateway/network/server failure because duplicate data may result.
+     */
+    public <T, R> R post(String endpoint, T requestBody, Class<R> responseType) {
 
-	        executeDelete(endpoint);
-	    }
-	    catch (HttpClientErrorException ex)
-	    {
-	        /*
-	         * MEDAS responded with a 4xx.
-	         *
-	         * Do NOT fail over.
-	         */
-	        throw ex;
-	    }
-	    catch (HttpServerErrorException ex)
-	    {
-	        if (isAvailabilityServerError(ex))
-	        {
-	            throw handleUnsafeRequestServerFailure(
-	                    "DELETE",
-	                    endpoint,
-	                    ex);
-	        }
+        String gatewayBaseUrl = properties.getGatewayBaseUrl();
 
-	        throw ex;
-	    }
-	    catch (ResourceAccessException ex)
-	    {
-	        /*
-	         * DELETE may already have been completed on the original server.
-	         * Do not automatically execute it against another server.
-	         */
-	        throw handleUnsafeRequestServerFailure(
-	                "DELETE",
-	                endpoint,
-	                ex);
-	    }
-	}
+        if (gatewayBaseUrl != null) {
+            try {
+                log.info("Executing KNG MEDAS POST through API Gateway. Endpoint: {}", endpoint);
 
-	// ############################################################################################################
-	// INTERNAL EXECUTION METHODS
-	// ############################################################################################################
+                return executePostWithUnauthorizedRetry(
+                        buildUrl(gatewayBaseUrl, endpoint),
+                        requestBody,
+                        responseType);
 
-	/**
-	 * Performs the actual authenticated GET request.
-	 *
-	 * Retry/failover decisions are intentionally handled by the public get()
-	 * method.
-	 */
-	private <T> T executeGet(String endpoint, Class<T> responseType) {
-		HttpHeaders headers = createAuthenticatedHeaders();
+            } catch (HttpClientErrorException ex) {
+                throw ex;
 
-		HttpEntity<Void> entity = new HttpEntity<>(headers);
+            } catch (HttpServerErrorException ex) {
+                if (isAvailabilityServerError(ex)) {
+                    throw handleUnsafeGatewayRequestFailure("POST", endpoint, ex);
+                }
+                throw ex;
 
-		ResponseEntity<T> response = restTemplate.exchange(buildUrl(endpoint), HttpMethod.GET, entity, responseType);
+            } catch (ResourceAccessException ex) {
+                throw handleUnsafeGatewayRequestFailure("POST", endpoint, ex);
+            }
+        }
 
-		return response.getBody();
-	}
+        log.warn(
+                "KNG MEDAS API Gateway is disabled or not configured. "
+                        + "Executing POST directly against MEDAS. Endpoint: {}",
+                endpoint);
 
-	/**
-	 * Performs the actual authenticated JSON POST request.
-	 */
-	private <T, R> R executePost(String endpoint, T requestBody, Class<R> responseType) {
-		HttpHeaders headers = createAuthenticatedHeaders();
+        return executeDirectPostOnce(endpoint, requestBody, responseType);
+    }
 
-		headers.setContentType(MediaType.APPLICATION_JSON);
+    /**
+     * Executes PUT through Gateway when configured.
+     *
+     * PUT is deliberately NOT replayed after an uncertain availability failure.
+     */
+    public <T, R> R put(String endpoint, T requestBody, Class<R> responseType) {
 
-		HttpEntity<T> entity = new HttpEntity<>(requestBody, headers);
+        String gatewayBaseUrl = properties.getGatewayBaseUrl();
 
-		ResponseEntity<R> response = restTemplate.exchange(buildUrl(endpoint), HttpMethod.POST, entity, responseType);
+        if (gatewayBaseUrl != null) {
+            try {
+                log.info("Executing KNG MEDAS PUT through API Gateway. Endpoint: {}", endpoint);
 
-		return response.getBody();
-	}
+                return executePutWithUnauthorizedRetry(
+                        buildUrl(gatewayBaseUrl, endpoint),
+                        requestBody,
+                        responseType);
 
-	/**
-	 * Performs the actual authenticated JSON PUT request.
-	 */
-	private <T, R> R executePut(String endpoint, T requestBody, Class<R> responseType) {
-		HttpHeaders headers = createAuthenticatedHeaders();
+            } catch (HttpClientErrorException ex) {
+                throw ex;
 
-		headers.setContentType(MediaType.APPLICATION_JSON);
+            } catch (HttpServerErrorException ex) {
+                if (isAvailabilityServerError(ex)) {
+                    throw handleUnsafeGatewayRequestFailure("PUT", endpoint, ex);
+                }
+                throw ex;
 
-		HttpEntity<T> entity = new HttpEntity<>(requestBody, headers);
+            } catch (ResourceAccessException ex) {
+                throw handleUnsafeGatewayRequestFailure("PUT", endpoint, ex);
+            }
+        }
 
-		ResponseEntity<R> response = restTemplate.exchange(buildUrl(endpoint), HttpMethod.PUT, entity, responseType);
+        log.warn(
+                "KNG MEDAS API Gateway is disabled or not configured. "
+                        + "Executing PUT directly against MEDAS. Endpoint: {}",
+                endpoint);
 
-		return response.getBody();
-	}
+        return executeDirectPutOnce(endpoint, requestBody, responseType);
+    }
 
-	/**
-	 * Performs the actual authenticated DELETE request.
-	 */
-	private void executeDelete(String endpoint) {
-		HttpHeaders headers = createAuthenticatedHeaders();
+    /**
+     * Executes DELETE through Gateway when configured.
+     *
+     * DELETE is deliberately NOT replayed after an uncertain availability failure.
+     */
+    public void delete(String endpoint) {
 
-		HttpEntity<Void> entity = new HttpEntity<>(headers);
+        String gatewayBaseUrl = properties.getGatewayBaseUrl();
 
-		restTemplate.exchange(buildUrl(endpoint), HttpMethod.DELETE, entity, Void.class);
-	}
+        if (gatewayBaseUrl != null) {
+            try {
+                log.info("Executing KNG MEDAS DELETE through API Gateway. Endpoint: {}", endpoint);
 
-	// ############################################################################################################
-	// RUNTIME FAILOVER METHODS
-	// ############################################################################################################
+                executeDeleteWithUnauthorizedRetry(
+                        buildUrl(gatewayBaseUrl, endpoint));
 
-	/**
-	 * Safe retry path used for GET requests.
-	 */
-	private <T> T retryGetAfterServerFailure(
-	        String endpoint,
-	        Class<T> responseType)
-	{
-	    invalidateCurrentServer();
+                return;
 
-	    /*
-	     * createAuthenticatedHeaders() inside executeGet()
-	     * will request another JWT.
-	     *
-	     * KngMedasAuthClient then performs:
-	     *
-	     * PRIME -> fallback[0] -> fallback[1] -> ...
-	     */
-	    return executeGet(
-	            endpoint,
-	            responseType);
-	}
+            } catch (HttpClientErrorException ex) {
+                throw ex;
 
+            } catch (HttpServerErrorException ex) {
+                if (isAvailabilityServerError(ex)) {
+                    throw handleUnsafeGatewayRequestFailure("DELETE", endpoint, ex);
+                }
+                throw ex;
 
-	/**
-	 * Determines whether a server-side HTTP status represents
-	 * an infrastructure/service availability problem.
-	 *
-	 * Only 502, 503 and 504 are considered availability failures here.
-	 * A generic 500 is left to the caller because it may represent an
-	 * application/database/business error rather than an unavailable server.
-	 */
-	private boolean isAvailabilityServerError(
-	        HttpServerErrorException ex)
-	{
-	    return ex.getStatusCode() == HttpStatus.BAD_GATEWAY
-	            || ex.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE
-	            || ex.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT;
-	}
+            } catch (ResourceAccessException ex) {
+                throw handleUnsafeGatewayRequestFailure("DELETE", endpoint, ex);
+            }
+        }
 
+        log.warn(
+                "KNG MEDAS API Gateway is disabled or not configured. "
+                        + "Executing DELETE directly against MEDAS. Endpoint: {}",
+                endpoint);
 
-	/**
-	 * Used for POST / PUT / DELETE failures.
-	 *
-	 * The active server and JWT are invalidated so that the NEXT
-	 * MEDAS call can resolve another server.
-	 *
-	 * The current write request is deliberately NOT replayed.
-	 */
-	private IllegalStateException handleUnsafeRequestServerFailure(
-	        String httpMethod,
-	        String endpoint,
-	        Exception cause)
-	{
-	    String failedBaseUrl =
-	            endpointResolver.getActiveBaseUrl();
+        executeDirectDeleteOnce(endpoint);
+    }
 
-	    invalidateCurrentServer();
+    // ############################################################################################################
+    // GATEWAY / COMMON EXECUTION WITH ONE JWT REFRESH
+    // ############################################################################################################
 
-	    return new IllegalStateException(
-	            "KNG MEDAS REST API server became unavailable during "
-	                    + httpMethod
-	                    + " request to endpoint: "
-	                    + endpoint
-	                    + ". Failed server: "
-	                    + failedBaseUrl
-	                    + ". The request was not automatically retried "
-	                    + "to avoid duplicate or inconsistent data.",
-	            cause);
-	}
+    private <T> T executeGetWithUnauthorizedRetry(String url, Class<T> responseType) {
+        try {
+            return executeGet(url, responseType);
+        } catch (HttpClientErrorException.Unauthorized ex) {
+            tokenService.invalidateToken();
+            return executeGet(url, responseType);
+        }
+    }
 
+    private <T, R> R executePostWithUnauthorizedRetry(
+            String url,
+            T requestBody,
+            Class<R> responseType) {
+        try {
+            return executePost(url, requestBody, responseType);
+        } catch (HttpClientErrorException.Unauthorized ex) {
+            tokenService.invalidateToken();
+            return executePost(url, requestBody, responseType);
+        }
+    }
 
-	/**
-	 * Invalidates:
-	 *
-	 * 1. Currently selected MEDAS server.
-	 * 2. JWT associated with that server.
-	 *
-	 * The next MEDAS call will therefore trigger endpoint resolution and
-	 * authentication again.
-	 */
-	private void invalidateCurrentServer()
-	{
-	    String failedBaseUrl =
-	            endpointResolver.getActiveBaseUrl();
+    private <T, R> R executePutWithUnauthorizedRetry(
+            String url,
+            T requestBody,
+            Class<R> responseType) {
+        try {
+            return executePut(url, requestBody, responseType);
+        } catch (HttpClientErrorException.Unauthorized ex) {
+            tokenService.invalidateToken();
+            return executePut(url, requestBody, responseType);
+        }
+    }
 
-	    if (failedBaseUrl != null)
-	    {
-	        endpointResolver.invalidate(
-	                failedBaseUrl);
-	    }
-	    else
-	    {
-	        endpointResolver.invalidate();
-	    }
+    private void executeDeleteWithUnauthorizedRetry(String url) {
+        try {
+            executeDelete(url);
+        } catch (HttpClientErrorException.Unauthorized ex) {
+            tokenService.invalidateToken();
+            executeDelete(url);
+        }
+    }
 
-	    tokenService.invalidateToken();
-	}
+    // ############################################################################################################
+    // DIRECT GET FAILOVER
+    // ############################################################################################################
 
-	// ############################################################################################################
-	// HEADER / URL METHODS
-	// ############################################################################################################
+    /**
+     * Executes a GET through the existing direct MEDAS PRIME/fallback chain.
+     */
+    private <T> T executeDirectGetWithFailover(String endpoint, Class<T> responseType) {
 
-	/**
-	 * Creates the common HTTP headers required by protected KNG MEDAS endpoints.
-	 *
-	 * The Authorization header value is supplied by KngMedasTokenService so
-	 * business/service code never handles the JWT directly.
-	 */
-	private HttpHeaders createAuthenticatedHeaders()
-	{
-		HttpHeaders headers = new HttpHeaders();
+        Exception lastException = null;
+        List<String> candidateUrls = endpointResolver.getCandidateBaseUrls();
 
-		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        if (candidateUrls == null || candidateUrls.isEmpty()) {
+            throw new IllegalStateException("No direct KNG MEDAS REST API server is configured.");
+        }
 
-		headers.set(HttpHeaders.AUTHORIZATION, tokenService.getAuthorizationHeaderValue());
+        for (String baseUrl : candidateUrls) {
+            String url = buildUrl(baseUrl, endpoint);
 
-		return headers;
-	}
+            try {
+                log.info("Attempting direct KNG MEDAS GET through server: {}", baseUrl);
 
-	/**
-	 * Combines the currently active MEDAS application base URL with a relative
-	 * REST endpoint.
-	 *
-	 * Example:
-	 *
-	 * active base URL = http://server:8080/kng_medas
-	 * endpoint        = /appointments_rest/create
-	 *
-	 * final URL       = http://server:8080/kng_medas/appointments_rest/create
-	 */
-	private String buildUrl(String endpoint) 
-	{
-		String baseUrl = endpointResolver.getActiveBaseUrl();
+                T result = executeGetWithUnauthorizedRetry(url, responseType);
 
-		if (baseUrl == null || baseUrl.trim().isEmpty()) 
-		{
-			throw new IllegalStateException("No active KNG MEDAS REST API server is available.");
-		}
-		
-		/*
-		 * Remove trailing slash characters before appending the endpoint.
-		 */
-		while (baseUrl.endsWith("/")) 
-		{
-			baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-		}
+                endpointResolver.markActive(baseUrl);
 
-		/*
-		 * If no endpoint was supplied, return only the active base URL.
-		 */
-		if (endpoint == null || endpoint.trim().isEmpty()) {
-			return baseUrl;
-		}
+                log.info("Direct KNG MEDAS GET succeeded through server: {}", baseUrl);
 
-		/*
-		 * Ensure exactly one slash exists between base URL and endpoint.
-		 */
-		return baseUrl + (endpoint.startsWith("/") ? endpoint : "/" + endpoint);
-	}
+                return result;
+
+            } catch (HttpClientErrorException ex) {
+                // A direct server responded. Do not hide request/auth/application errors by switching servers.
+                throw ex;
+
+            } catch (HttpServerErrorException ex) {
+                if (!isAvailabilityServerError(ex)) {
+                    throw ex;
+                }
+
+                log.warn(
+                        "Direct KNG MEDAS server {} returned infrastructure error {} for GET endpoint {}. "
+                                + "Trying next configured server.",
+                        baseUrl,
+                        ex.getStatusCode(),
+                        endpoint);
+
+                invalidateDirectServer(baseUrl);
+                lastException = ex;
+
+            } catch (ResourceAccessException ex) {
+                log.warn(
+                        "Unable to reach direct KNG MEDAS server {} for GET endpoint {}. "
+                                + "Trying next configured server. Cause: {}",
+                        baseUrl,
+                        endpoint,
+                        ex.getMessage());
+
+                invalidateDirectServer(baseUrl);
+                lastException = ex;
+            }
+        }
+
+        log.error("No direct KNG MEDAS REST API server was available for GET endpoint: {}", endpoint);
+
+        throw new IllegalStateException(
+                "No direct KNG MEDAS REST API server was available for GET endpoint: " + endpoint,
+                lastException);
+    }
+
+    // ############################################################################################################
+    // DIRECT WRITE EXECUTION - NO AUTOMATIC REPLAY
+    // ############################################################################################################
+
+    private <T, R> R executeDirectPostOnce(
+            String endpoint,
+            T requestBody,
+            Class<R> responseType) {
+
+        String baseUrl = resolveDirectBaseUrl();
+        String url = buildUrl(baseUrl, endpoint);
+
+        try {
+            R result = executePostWithUnauthorizedRetry(url, requestBody, responseType);
+            endpointResolver.markActive(baseUrl);
+            return result;
+        } catch (HttpServerErrorException ex) {
+            if (isAvailabilityServerError(ex)) {
+                throw handleUnsafeDirectRequestFailure("POST", endpoint, baseUrl, ex);
+            }
+            throw ex;
+        } catch (ResourceAccessException ex) {
+            throw handleUnsafeDirectRequestFailure("POST", endpoint, baseUrl, ex);
+        }
+    }
+
+    private <T, R> R executeDirectPutOnce(
+            String endpoint,
+            T requestBody,
+            Class<R> responseType) {
+
+        String baseUrl = resolveDirectBaseUrl();
+        String url = buildUrl(baseUrl, endpoint);
+
+        try {
+            R result = executePutWithUnauthorizedRetry(url, requestBody, responseType);
+            endpointResolver.markActive(baseUrl);
+            return result;
+        } catch (HttpServerErrorException ex) {
+            if (isAvailabilityServerError(ex)) {
+                throw handleUnsafeDirectRequestFailure("PUT", endpoint, baseUrl, ex);
+            }
+            throw ex;
+        } catch (ResourceAccessException ex) {
+            throw handleUnsafeDirectRequestFailure("PUT", endpoint, baseUrl, ex);
+        }
+    }
+
+    private void executeDirectDeleteOnce(String endpoint) {
+
+        String baseUrl = resolveDirectBaseUrl();
+        String url = buildUrl(baseUrl, endpoint);
+
+        try {
+            executeDeleteWithUnauthorizedRetry(url);
+            endpointResolver.markActive(baseUrl);
+        } catch (HttpServerErrorException ex) {
+            if (isAvailabilityServerError(ex)) {
+                throw handleUnsafeDirectRequestFailure("DELETE", endpoint, baseUrl, ex);
+            }
+            throw ex;
+        } catch (ResourceAccessException ex) {
+            throw handleUnsafeDirectRequestFailure("DELETE", endpoint, baseUrl, ex);
+        }
+    }
+
+    // ############################################################################################################
+    // LOW-LEVEL HTTP EXECUTION
+    // ############################################################################################################
+
+    private <T> T executeGet(String url, Class<T> responseType) {
+        HttpHeaders headers = createAuthenticatedHeaders();
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<T> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                responseType);
+
+        return response.getBody();
+    }
+
+    private <T, R> R executePost(String url, T requestBody, Class<R> responseType) {
+        HttpHeaders headers = createAuthenticatedHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<T> entity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<R> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                entity,
+                responseType);
+
+        return response.getBody();
+    }
+
+    private <T, R> R executePut(String url, T requestBody, Class<R> responseType) {
+        HttpHeaders headers = createAuthenticatedHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<T> entity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<R> response = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                entity,
+                responseType);
+
+        return response.getBody();
+    }
+
+    private void executeDelete(String url) {
+        HttpHeaders headers = createAuthenticatedHeaders();
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        restTemplate.exchange(
+                url,
+                HttpMethod.DELETE,
+                entity,
+                Void.class);
+    }
+
+    // ############################################################################################################
+    // FAILURE / ROUTE HELPERS
+    // ############################################################################################################
+
+    private boolean isAvailabilityServerError(HttpServerErrorException ex) {
+        return ex.getStatusCode() == HttpStatus.BAD_GATEWAY
+                || ex.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE
+                || ex.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT;
+    }
+
+    /**
+     * Gateway write failure. The write is NOT replayed directly because the
+     * request outcome may be unknown.
+     */
+    private IllegalStateException handleUnsafeGatewayRequestFailure(
+            String httpMethod,
+            String endpoint,
+            Exception cause) {
+
+        tokenService.invalidateToken();
+
+        log.error(
+                "KNG MEDAS {} through API Gateway failed for endpoint {}. "
+                        + "The request was NOT automatically replayed directly to MEDAS.",
+                httpMethod,
+                endpoint);
+
+        return new IllegalStateException(
+                "KNG MEDAS API Gateway became unavailable during "
+                        + httpMethod
+                        + " request to endpoint: "
+                        + endpoint
+                        + ". The request was not automatically retried through direct MEDAS "
+                        + "to avoid duplicate or inconsistent data.",
+                cause);
+    }
+
+    /**
+     * Direct write failure. The current direct server is invalidated, but the
+     * write is NOT replayed against another direct server.
+     */
+    private IllegalStateException handleUnsafeDirectRequestFailure(
+            String httpMethod,
+            String endpoint,
+            String failedBaseUrl,
+            Exception cause) {
+
+        invalidateDirectServer(failedBaseUrl);
+        tokenService.invalidateToken();
+
+        log.error(
+                "Direct KNG MEDAS {} failed through server {} for endpoint {}. "
+                        + "The request was NOT replayed against another MEDAS server.",
+                httpMethod,
+                failedBaseUrl,
+                endpoint);
+
+        return new IllegalStateException(
+                "KNG MEDAS REST API server became unavailable during "
+                        + httpMethod
+                        + " request to endpoint: "
+                        + endpoint
+                        + ". Failed server: "
+                        + failedBaseUrl
+                        + ". The request was not automatically retried "
+                        + "to avoid duplicate or inconsistent data.",
+                cause);
+    }
+
+    private void invalidateDirectServer(String baseUrl) {
+        if (baseUrl != null) {
+            endpointResolver.invalidate(baseUrl);
+        }
+    }
+
+    /**
+     * Resolves one direct server for a non-replayable write.
+     *
+     * Prefer the remembered active direct server. If none exists, use the first
+     * configured direct server. Token acquisition may itself select/mark a direct
+     * server when Gateway is disabled.
+     */
+    private String resolveDirectBaseUrl()
+    {
+        /*
+         * If a working direct MEDAS server is already known,
+         * continue using it.
+         */
+        String activeBaseUrl =
+                endpointResolver.getActiveBaseUrl();
+
+        if (activeBaseUrl != null
+                && !activeBaseUrl.trim().isEmpty())
+        {
+            return activeBaseUrl;
+        }
+
+        /*
+         * No direct server is currently selected.
+         *
+         * Force a fresh authentication cycle.
+         *
+         * When this method is used, Gateway is disabled/not configured.
+         * Therefore KngMedasAuthClient will execute the existing
+         * PRIME -> fallback authentication sequence and mark the
+         * first working direct MEDAS server as active.
+         */
+        tokenService.invalidateToken();
+
+        tokenService.getValidToken();
+
+        activeBaseUrl =   endpointResolver.getActiveBaseUrl();
+
+        if (activeBaseUrl == null
+                || activeBaseUrl.trim().isEmpty())
+        {
+            throw new IllegalStateException(
+                    "No working direct KNG MEDAS REST API server could be selected.");
+        }
+
+        return activeBaseUrl;
+    }
+
+    // ############################################################################################################
+    // HEADER / URL HELPERS
+    // ############################################################################################################
+
+    private HttpHeaders createAuthenticatedHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.set(HttpHeaders.AUTHORIZATION, tokenService.getAuthorizationHeaderValue());
+
+        return headers;
+    }
+
+    /**
+     * Combines a supplied application base URL with a relative REST endpoint.
+     *
+     * Gateway example:
+     * base URL = http://localhost:8888/kng_medas
+     * endpoint = /appointments_rest/create
+     *
+     * Direct example:
+     * base URL = http://10.201.49.120:8080/kng_medas
+     * endpoint = /appointments_rest/create
+     */
+    private String buildUrl(String baseUrl, String endpoint) {
+        if (baseUrl == null || baseUrl.trim().isEmpty()) {
+            throw new IllegalStateException("KNG MEDAS base URL is not available.");
+        }
+
+        String normalizedBaseUrl = baseUrl.trim();
+
+        while (normalizedBaseUrl.endsWith("/")) {
+            normalizedBaseUrl = normalizedBaseUrl.substring(0, normalizedBaseUrl.length() - 1);
+        }
+
+        if (endpoint == null || endpoint.trim().isEmpty()) {
+            return normalizedBaseUrl;
+        }
+
+        String normalizedEndpoint = endpoint.trim();
+
+        return normalizedBaseUrl
+                + (normalizedEndpoint.startsWith("/")
+                        ? normalizedEndpoint
+                        : "/" + normalizedEndpoint);
+    }
 }

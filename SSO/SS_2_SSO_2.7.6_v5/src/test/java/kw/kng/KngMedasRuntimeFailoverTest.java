@@ -1,8 +1,8 @@
 package kw.kng;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -20,252 +20,421 @@ import kw.kng.security.medasApiSecurity.config.KngMedasApiConfig;
 import kw.kng.security.medasApiSecurity.config.KngMedasApiProperties;
 import kw.kng.security.medasApiSecurity.endpoint.KngMedasEndpointResolver;
 import kw.kng.security.medasApiSecurity.endpoint.KngMedasEndpointResolverImpl;
-import kw.kng.security.medasApiSecurity.token.KngMedasTokenService;
 import kw.kng.security.medasApiSecurity.token.KngMedasTokenServiceImpl;
 
+
+/**
+ * Manual integration test for runtime failover from:
+ *
+ * PRIMARY:
+ * PATMRD -> API Gateway -> KNG MEDAS REST
+ *
+ * to:
+ *
+ * SECONDARY:
+ * PATMRD -> Direct MEDAS server
+ *
+ *
+ * TEST PROCEDURE:
+ *
+ * 1. Start Eureka.
+ * 2. Start KNG MEDAS REST.
+ * 3. Start API Gateway.
+ * 4. Run this test.
+ * 5. The first GET must succeed through Gateway.
+ * 6. During the countdown, STOP ONLY THE API GATEWAY.
+ * 7. Do NOT stop MEDAS REST.
+ * 8. The second GET should automatically fall back
+ *    to a direct MEDAS server.
+ *
+ *
+ * IMPORTANT:
+ *
+ * This test uses GET because GET can safely be replayed
+ * after an availability failure.
+ *
+ * Do NOT use POST / PUT / DELETE for this runtime
+ * failover test.
+ */
 @Disabled("Manual KNG MEDAS integration test - do not run during normal WAR build")
-@SpringBootTest(classes = { KngMedasApiConfig.class, KngMedasEndpointResolverImpl.class, KngMedasAuthClient.class,
-		KngMedasApiClient.class, KngMedasTokenServiceImpl.class, KngMedasRuntimeFailoverTest.TestConfig.class })
+@SpringBootTest(classes = {
+        KngMedasApiConfig.class,
+        KngMedasEndpointResolverImpl.class,
+        KngMedasAuthClient.class,
+        KngMedasApiClient.class,
+        KngMedasTokenServiceImpl.class,
+        KngMedasRuntimeFailoverTest.TestConfig.class
+})
 @ActiveProfiles("prod")
-public class KngMedasRuntimeFailoverTest {
+public class KngMedasRuntimeFailoverTest
+{
 
-	// ############################################################################################################
-	// TEST CONFIGURATION
-	// ############################################################################################################
+    // ############################################################################################################
+    // TEST CONFIGURATION
+    // ############################################################################################################
 
-	private static final String EXPECTED_INITIAL_SERVER = "http://10.201.49.120:8080/kng_medas";
+    /*
+     * Safe GET endpoint.
+     *
+     * This request does not insert/update/delete MEDAS data.
+     */
+    private static final String TEST_GET_ENDPOINT =
+            "/actuator/health";
 
-	private static final String EXPECTED_FAILOVER_SERVER = "http://10.201.53.180:8080/kng_medas";
 
-	/*
-	 * Safe GET endpoint.
-	 *
-	 * This request does not insert/update/delete MEDAS data.
-	 */
-	private static final String TEST_GET_ENDPOINT = "/actuator/health";
+    /*
+     * Time given to manually stop the API Gateway.
+     */
+    private static final int FAILOVER_COUNTDOWN_SECONDS =
+            80;
 
-	/*
-	 * Time given to manually stop Tomcat on the PRIME server.
-	 */
-	private static final int FAILOVER_COUNTDOWN_SECONDS = 80;
 
-	// ############################################################################################################
-	// SPRING COMPONENTS
-	// ############################################################################################################
+    // ############################################################################################################
+    // SPRING COMPONENTS
+    // ############################################################################################################
 
-	@Autowired
-	private KngMedasTokenService tokenService;
+    @Autowired
+    private KngMedasEndpointResolver endpointResolver;
 
-	@Autowired
-	private KngMedasEndpointResolver endpointResolver;
+    @Autowired
+    private KngMedasApiClient medasApiClient;
 
-	@Autowired
-	private KngMedasApiClient medasApiClient;
+    @Autowired
+    private KngMedasApiProperties properties;
 
-	@Autowired
-	private KngMedasApiProperties properties;
 
-	// ############################################################################################################
-	// RUNTIME FAILOVER TEST
-	// ############################################################################################################
+    // ############################################################################################################
+    // RUNTIME FAILOVER TEST
+    // ############################################################################################################
 
-	@Test
-	public void testRuntimeFailover() throws Exception {
+    @Test
+    public void testGatewayToDirectRuntimeFailover()
+            throws Exception
+    {
 
-		System.out.println("=======================================================");
+        System.out.println(
+                "=======================================================");
 
-		System.out.println("KNG MEDAS RUNTIME FAILOVER TEST -> START");
+        System.out.println(
+                "KNG MEDAS GATEWAY -> DIRECT RUNTIME FAILOVER TEST");
 
-		System.out.println("=======================================================");
+        System.out.println(
+                "=======================================================");
 
-		// --------------------------------------------------------------------------------------------------------
-		// STEP 1
-		// VERIFY CONFIGURATION
-		// --------------------------------------------------------------------------------------------------------
 
-		assertFalse(properties.getCandidateBaseUrls().isEmpty(),
-				"At least one KNG MEDAS REST API server must be configured.");
+        // --------------------------------------------------------------------------------------------------------
+        // STEP 1
+        // VERIFY CONFIGURATION
+        // --------------------------------------------------------------------------------------------------------
 
-		System.out.println();
+        String gatewayBaseUrl =
+                properties.getGatewayBaseUrl();
 
-		System.out.println("STEP 1 - Configured MEDAS Servers");
 
-		for (String baseUrl : properties.getCandidateBaseUrls()) {
-			System.out.println("Candidate = " + baseUrl);
-		}
+        assertNotNull(
+                gatewayBaseUrl,
+                "API Gateway must be enabled/configured for this test.");
 
-		// --------------------------------------------------------------------------------------------------------
-		// STEP 2
-		// AUTHENTICATE WHILE PRIME SERVER IS RUNNING
-		// --------------------------------------------------------------------------------------------------------
 
-		System.out.println();
+        assertFalse(
+                properties.getCandidateBaseUrls().isEmpty(),
+                "At least one direct KNG MEDAS REST API server must be configured.");
 
-		System.out.println("STEP 2 - Authenticating against KNG MEDAS...");
 
-		String token = tokenService.getValidToken();
+        System.out.println();
+        System.out.println(
+                "STEP 1 - Runtime Failover Configuration");
 
-		assertNotNull(token, "JWT token should not be null.");
 
-		assertFalse(token.trim().isEmpty(), "JWT token should not be empty.");
+        System.out.println(
+                "Gateway Base URL = "
+                        + gatewayBaseUrl);
 
-		String initialServer = endpointResolver.getActiveBaseUrl();
 
-		assertNotNull(initialServer, "Initial active MEDAS server should not be null.");
+        System.out.println();
+        System.out.println(
+                "Direct MEDAS fallback servers:");
 
-		System.out.println();
 
-		System.out.println("Initial Active Server =");
+        for (String baseUrl :
+                properties.getCandidateBaseUrls())
+        {
+            System.out.println(
+                    "Candidate = "
+                            + baseUrl);
+        }
 
-		System.out.println(initialServer);
 
-		// --------------------------------------------------------------------------------------------------------
-		// STEP 3
-		// VERIFY PRIME WAS SELECTED
-		// --------------------------------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------------------------------
+        // STEP 2
+        // ENSURE DIRECT ROUTE HAS NOT ALREADY BEEN SELECTED
+        // --------------------------------------------------------------------------------------------------------
 
-		assertEquals(EXPECTED_INITIAL_SERVER, initialServer, "PRIME MEDAS server should initially be selected.");
+        endpointResolver.invalidate();
 
-		System.out.println();
 
-		System.out.println("PRIME SERVER SUCCESSFULLY SELECTED.");
+        assertNull(
+                endpointResolver.getActiveBaseUrl(),
+                "No direct MEDAS server should be active before the Gateway test begins.");
 
-		System.out.println();
 
-		System.out.println("=======================================================");
+        // --------------------------------------------------------------------------------------------------------
+        // STEP 3
+        // FIRST GET - GATEWAY MUST BE AVAILABLE
+        // --------------------------------------------------------------------------------------------------------
 
-		System.out.println("NOW STOP TOMCAT ON SERVER 10.201.49.120");
+        System.out.println();
+        System.out.println(
+                "STEP 3 - Performing initial GET through API Gateway...");
 
-		System.out.println();
 
-		System.out.println("DO NOT STOP THIS JUNIT TEST.");
+        System.out.println(
+                "Endpoint = "
+                        + TEST_GET_ENDPOINT);
 
-		System.out.println();
 
-		System.out.println("You have " + FAILOVER_COUNTDOWN_SECONDS + " seconds.");
+        Object initialResponse =
+                medasApiClient.get(
+                        TEST_GET_ENDPOINT,
+                        Object.class);
 
-		System.out.println("=======================================================");
 
-		System.out.println();
+        assertNotNull(
+                initialResponse,
+                "Initial Gateway GET response should not be null.");
 
-		// --------------------------------------------------------------------------------------------------------
-		// STEP 4
-		// COUNTDOWN WHILE USER STOPS TOMCAT ON PRIME
-		// --------------------------------------------------------------------------------------------------------
 
-		runFailoverCountdown();
+        /*
+         * If Gateway handled the GET successfully, the direct
+         * endpoint resolver should still have no active server.
+         */
+        String directServerAfterInitialGet =
+                endpointResolver.getActiveBaseUrl();
 
-		// --------------------------------------------------------------------------------------------------------
-		// STEP 5
-		// CALL SAFE GET
-		// --------------------------------------------------------------------------------------------------------
 
-		System.out.println();
+        assertNull(
+                directServerAfterInitialGet,
+                "A direct MEDAS server became active during the initial GET. "
+                        + "The initial request may not have used the API Gateway.");
 
-		System.out.println("=======================================================");
 
-		System.out.println("COUNTDOWN COMPLETE.");
+        System.out.println();
+        System.out.println(
+                "Initial GET completed successfully.");
 
-		System.out.println("Testing runtime failover now...");
+        System.out.println(
+                "Initial Request Route = API GATEWAY");
 
-		System.out.println("=======================================================");
+        System.out.println(
+                "Gateway Base URL = "
+                        + gatewayBaseUrl);
 
-		System.out.println();
+        System.out.println(
+                "Active Direct MEDAS Server = NONE");
 
-		System.out.println("STEP 5 - Calling MEDAS GET endpoint...");
 
-		System.out.println("Endpoint = " + TEST_GET_ENDPOINT);
+        // --------------------------------------------------------------------------------------------------------
+        // STEP 4
+        // MANUAL GATEWAY SHUTDOWN
+        // --------------------------------------------------------------------------------------------------------
 
-		Object response = medasApiClient.get(TEST_GET_ENDPOINT, Object.class);
+        System.out.println();
+        System.out.println(
+                "=======================================================");
 
-		assertNotNull(response, "MEDAS GET response should not be null.");
+        System.out.println(
+                "NOW STOP THE KNG MSD API GATEWAY.");
 
-		// --------------------------------------------------------------------------------------------------------
-		// STEP 6
-		// CHECK WHICH SERVER IS NOW ACTIVE
-		// --------------------------------------------------------------------------------------------------------
+        System.out.println();
 
-		String finalServer = endpointResolver.getActiveBaseUrl();
+        System.out.println(
+                "For your current local DEV environment:");
 
-		assertNotNull(finalServer, "Final active MEDAS server should not be null.");
+        System.out.println(
+                "Stop the application running on port 8888.");
 
-		System.out.println();
+        System.out.println();
 
-		System.out.println("Final Active Server =");
+        System.out.println(
+                "DO NOT STOP EUREKA.");
 
-		System.out.println(finalServer);
+        System.out.println(
+                "DO NOT STOP KNG MEDAS REST.");
 
-		// --------------------------------------------------------------------------------------------------------
-		// STEP 7
-		// VERIFY FAILOVER SERVER
-		// --------------------------------------------------------------------------------------------------------
+        System.out.println();
 
-		assertEquals(EXPECTED_FAILOVER_SERVER, finalServer,
-				"MEDAS runtime failover should switch from PRIME " + "server to the first available fallback server.");
+        System.out.println(
+                "You have "
+                        + FAILOVER_COUNTDOWN_SECONDS
+                        + " seconds.");
 
-		// --------------------------------------------------------------------------------------------------------
-		// SUCCESS
-		// --------------------------------------------------------------------------------------------------------
+        System.out.println(
+                "=======================================================");
 
-		System.out.println();
 
-		System.out.println("=======================================================");
+        // --------------------------------------------------------------------------------------------------------
+        // STEP 5
+        // COUNTDOWN
+        // --------------------------------------------------------------------------------------------------------
 
-		System.out.println("KNG MEDAS RUNTIME FAILOVER -> SUCCESS");
+        runFailoverCountdown();
 
-		System.out.println("=======================================================");
 
-		System.out.println();
+        // --------------------------------------------------------------------------------------------------------
+        // STEP 6
+        // SECOND GET - GATEWAY SHOULD FAIL AND DIRECT ROUTE SHOULD TAKE OVER
+        // --------------------------------------------------------------------------------------------------------
 
-		System.out.println("Initial Server : " + initialServer);
+        System.out.println();
+        System.out.println(
+                "=======================================================");
 
-		System.out.println("Failover Server: " + finalServer);
+        System.out.println(
+                "COUNTDOWN COMPLETE.");
 
-		System.out.println();
+        System.out.println(
+                "Testing Gateway -> Direct MEDAS failover now...");
 
-		System.out.println("GET request completed successfully after failover.");
+        System.out.println(
+                "=======================================================");
 
-		System.out.println();
 
-		System.out.println("=======================================================");
+        Object failoverResponse =
+                medasApiClient.get(
+                        TEST_GET_ENDPOINT,
+                        Object.class);
 
-		System.out.println("KNG MEDAS RUNTIME FAILOVER TEST -> END");
 
-		System.out.println("=======================================================");
-	}
+        assertNotNull(
+                failoverResponse,
+                "MEDAS GET response after Gateway failure should not be null.");
 
-	// ############################################################################################################
-	// COUNTDOWN UTILITY
-	// ############################################################################################################
 
-	/**
-	 * Gives the tester enough time to manually stop Tomcat on the currently active
-	 * PRIME MEDAS server.
-	 *
-	 * Countdown is displayed in the STS console.
-	 */
-	private void runFailoverCountdown() throws InterruptedException {
+        // --------------------------------------------------------------------------------------------------------
+        // STEP 7
+        // VERIFY DIRECT SERVER WAS SELECTED
+        // --------------------------------------------------------------------------------------------------------
 
-		for (int seconds = FAILOVER_COUNTDOWN_SECONDS; seconds >= 1; seconds--) {
+        String activeDirectServer =
+                endpointResolver.getActiveBaseUrl();
 
-			System.out.println(
-					"Runtime failover test starts in " + seconds + " second" + (seconds == 1 ? "" : "s") + "...");
 
-			Thread.sleep(1000);
-		}
-	}
+        assertNotNull(
+                activeDirectServer,
+                "A direct MEDAS server should have been selected "
+                        + "after the API Gateway became unavailable.");
 
-	// ############################################################################################################
-	// TEST-ONLY SPRING CONFIGURATION
-	// ############################################################################################################
+        assertFalse(
+                activeDirectServer.trim().isEmpty(),
+                "The selected direct MEDAS server should not be empty.");
 
-	@Configuration
-	@EnableConfigurationProperties(KngMedasApiProperties.class)
-	static class TestConfig {
 
-		@Bean
-		RestTemplateBuilder restTemplateBuilder() {
-			return new RestTemplateBuilder();
-		}
-	}
+        System.out.println();
+        System.out.println(
+                "Gateway failure detected successfully.");
+
+        System.out.println(
+                "Failover Request Route = DIRECT MEDAS");
+
+        System.out.println(
+                "Active Direct MEDAS Server = "
+                        + activeDirectServer);
+
+
+        // --------------------------------------------------------------------------------------------------------
+        // SUCCESS
+        // --------------------------------------------------------------------------------------------------------
+
+        System.out.println();
+        System.out.println(
+                "=======================================================");
+
+        System.out.println(
+                "KNG MEDAS GATEWAY -> DIRECT FAILOVER SUCCESS");
+
+        System.out.println(
+                "=======================================================");
+
+
+        System.out.println();
+
+        System.out.println(
+                "Initial Route  : API GATEWAY");
+
+        System.out.println(
+                "Gateway       : "
+                        + gatewayBaseUrl);
+
+        System.out.println(
+                "Failover Route : DIRECT MEDAS");
+
+        System.out.println(
+                "Direct Server  : "
+                        + activeDirectServer);
+
+        System.out.println();
+
+        System.out.println(
+                "GET request completed successfully after "
+                        + "API Gateway failure.");
+
+        System.out.println();
+
+        System.out.println(
+                "=======================================================");
+
+        System.out.println(
+                "KNG MEDAS RUNTIME FAILOVER TEST -> END");
+
+        System.out.println(
+                "=======================================================");
+    }
+
+
+    // ############################################################################################################
+    // COUNTDOWN UTILITY
+    // ############################################################################################################
+
+    /**
+     * Gives the tester enough time to manually stop
+     * the API Gateway.
+     */
+    private void runFailoverCountdown()
+            throws InterruptedException
+    {
+
+        for (int seconds =
+                FAILOVER_COUNTDOWN_SECONDS;
+                seconds >= 1;
+                seconds--)
+        {
+
+            System.out.println(
+                    "Runtime failover test starts in "
+                            + seconds
+                            + " second"
+                            + (seconds == 1 ? "" : "s")
+                            + "...");
+
+            Thread.sleep(1000);
+        }
+    }
+
+
+    // ############################################################################################################
+    // TEST-ONLY SPRING CONFIGURATION
+    // ############################################################################################################
+
+    @Configuration
+    @EnableConfigurationProperties(
+            KngMedasApiProperties.class)
+    static class TestConfig
+    {
+
+        @Bean
+        RestTemplateBuilder restTemplateBuilder()
+        {
+            return new RestTemplateBuilder();
+        }
+    }
 }

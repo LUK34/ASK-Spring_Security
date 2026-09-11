@@ -2,6 +2,9 @@ package kw.kng.security.medasApiSecurity.token;
 
 import org.springframework.stereotype.Service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import kw.kng.security.medasApiSecurity.client.KngMedasAuthClient;
 import kw.kng.security.medasApiSecurity.dto.MedasAuthResponseDto;
 
@@ -24,6 +27,8 @@ public class KngMedasTokenServiceImpl implements KngMedasTokenService
 	 */
 	private static final long REFRESH_BUFFER_MS = 60_000L;
 
+	private static final Logger log = LoggerFactory.getLogger(KngMedasTokenServiceImpl.class);
+	
 	/*
 	 * Cached JWT information.
 	 *
@@ -114,6 +119,7 @@ public class KngMedasTokenServiceImpl implements KngMedasTokenService
 		cachedToken = null;
 		tokenType = null;
 		tokenExpiryTimeMs = 0L;
+		 log.info("Cached KNG MEDAS JWT invalidated.");
 	}
 	// #########################################################################################
 
@@ -141,7 +147,10 @@ public class KngMedasTokenServiceImpl implements KngMedasTokenService
 	 * The expiry timestamp is calculated using the current system time plus
 	 * the expiration duration returned by the KNG MEDAS authentication endpoint.
 	 */
-	private void refreshToken() {
+	private void refreshToken() 
+	{
+		log.info("Requesting new KNG MEDAS JWT.");
+		
 		MedasAuthResponseDto response = authClient.authenticate();
 
 		cachedToken = response.getToken();
@@ -154,10 +163,12 @@ public class KngMedasTokenServiceImpl implements KngMedasTokenService
 
 		if (expiresIn <= 0) 
 		{
+			 log.error("KNG MEDAS returned an invalid JWT expiration value.");
 			throw new IllegalStateException("KNG MEDAS returned an invalid JWT expiration.");
 		}
 
 		tokenExpiryTimeMs = System.currentTimeMillis() + expiresIn;
+		 log.info("KNG MEDAS JWT refreshed successfully.");
 	}
 
 	// #########################################################################################

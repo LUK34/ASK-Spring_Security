@@ -4,35 +4,45 @@ import java.util.Arrays;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.core.env.Environment;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 @Configuration
-public class ProfileChecker 
-{
+@ConditionalOnProperty(
+        prefix = "kng.prerequisites",
+        name = {
+                "startup.enabled",
+                "profile.enabled"
+        },
+        havingValue = "true",
+        matchIfMissing = false
+)
+public class ProfileChecker {
 
-    @Autowired
-    private Environment env;
+    private static final Logger logger =
+            LoggerFactory.getLogger(ProfileChecker.class);
+
+    private final Environment environment;
+
+    public ProfileChecker(Environment environment) {
+        this.environment = environment;
+    }
 
     @PostConstruct
-    public void checkProfile() 
-    {
-    	System.out.println("#############################################################################################");
-    	System.out.println("--------------------------------- PROFILE CHECKER -------------------------------------------");
-    	System.out.println("#############################################################################################");
-        System.out.println(">>> Active Profiles: " +Arrays.toString(env.getActiveProfiles()));
-        System.out.println("#############################################################################################");
+    public void checkProfile() {
+
+        logger.info("#############################################################################################");
+        logger.info("--------------------------------- PROFILE CHECKER -------------------------------------------");
+        logger.info("#############################################################################################");
+
+        logger.info(
+                ">>> Active Profiles : {}",
+                Arrays.toString(
+                        environment.getActiveProfiles()));
+
+        logger.info("#############################################################################################");
     }
 }
-/*
-Knowledge Transfer:
-----------------------------
-1. Check which profile is active
-2. Full compatible with 2.x.x
-3. Mainly compatibele Java 1.8
- 
-*/
-
-
-

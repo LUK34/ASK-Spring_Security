@@ -10,6 +10,14 @@ import org.springframework.stereotype.Component;
 
 import lombok.Data;
 
+/*
+ 	// ################################################################################################################################
+ 	 													
+ 	 												// CODE 1:
+ 	
+ 	// ################################################################################################################################
+ */
+
 
 /**
  * Central configuration-properties class for the KNG MEDAS REST API integration.
@@ -44,6 +52,16 @@ public class KngMedasApiProperties
      * Contains the prime MEDAS server and ordered fallback servers.
      */
 	private Server server = new Server();
+	
+	/**
+	 * API Gateway configuration.
+	 *
+	 * API Gateway is the preferred/primary route for communication
+	 * with KNG MEDAS REST API.
+	 */
+	private Gateway gateway = new Gateway();
+	
+	
 
 	/**
      * Deployed KNG MEDAS WAR/context name.
@@ -96,11 +114,82 @@ public class KngMedasApiProperties
      */
 	private int readTimeout = 15000;
 
-	 // ============================================================================================================
-    // MEDAS SERVER CONFIGURATION
+	// ###################################################################################################################################
+	// ============================================================================================================
+    // MEDAS API GATEWAY CONFIGURATION -> PRIMARY WORKFLOW -> START
     // ============================================================================================================
-
+	// ###################################################################################################################################
 	
+	@Data
+	public static class Gateway {
+
+	    /**
+	     * Controls whether API Gateway should be attempted as the
+	     * primary MEDAS communication route.
+	     */
+	    private boolean enabled = true;
+
+	    /**
+	     * API Gateway server URL.
+	     *
+	     * DEV example:
+	     * http://localhost:8888
+	     *
+	     * PROD example:
+	     * http://10.201.49.120:8888
+	     */
+	    private String url;
+	}
+	
+	
+	/**
+	 * Builds the KNG MEDAS application URL through API Gateway.
+	 *
+	 * Example:
+	 *
+	 * gateway.url = http://localhost:8888 (DEV) / http://10.201.49.120:8888 (PROD)
+	 * war         = kng_medas
+	 *
+	 * result:
+	 * http://localhost:8888/kng_medas
+	 *
+	 * @return Gateway MEDAS base URL, or null when Gateway is disabled
+	 *         or no Gateway URL is configured
+	 */
+	public String getGatewayBaseUrl() {
+
+	    if (gateway == null || !gateway.isEnabled()) {
+	        return null;
+	    }
+
+	    if (gateway.getUrl() == null
+	            || gateway.getUrl().trim().isEmpty()) {
+	        return null;
+	    }
+
+	    StringBuilder baseUrl =
+	            new StringBuilder(normalizeBaseUrl(gateway.getUrl()));
+
+	    if (war != null && !war.trim().isEmpty()) {
+	        baseUrl.append("/");
+	        baseUrl.append(trimSlashes(war));
+	    }
+
+	    return baseUrl.toString();
+	}
+	
+	// ###################################################################################################################################
+	// ============================================================================================================
+	// MEDAS API GATEWAY CONFIGURATION -> PRIMARY WORKFLOW -> END
+	// ============================================================================================================
+	// ###################################################################################################################################
+		
+
+	// ###################################################################################################################################
+	// ============================================================================================================
+    // MEDAS SERVER CONFIGURATION -> FAILOVER WORKFLOW -> START
+    // ============================================================================================================
+	// ###################################################################################################################################
 	  /**
      * Groups the KNG MEDAS server addresses used by the failover mechanism.
      *
@@ -120,7 +209,6 @@ public class KngMedasApiProperties
 		private List<String> fallbacks = new ArrayList<>();
 	}
 
-	
 	 // ============================================================================================================
     // CANDIDATE BASE URL CONSTRUCTION
     // ============================================================================================================
@@ -310,5 +398,11 @@ public class KngMedasApiProperties
 		return result;
 	}
 	// ----------------------------------------------------------------------------------
+
+	// ###################################################################################################################################
+	// ============================================================================================================
+    // MEDAS SERVER CONFIGURATION -> FAILOVER WORKFLOW -> END
+    // ============================================================================================================
+	// ###################################################################################################################################
 
 }

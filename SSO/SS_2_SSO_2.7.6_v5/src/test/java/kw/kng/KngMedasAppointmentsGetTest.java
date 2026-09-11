@@ -24,6 +24,35 @@ import kw.kng.security.medasApiSecurity.endpoint.KngMedasEndpointResolverImpl;
 import kw.kng.security.medasApiSecurity.token.KngMedasTokenService;
 import kw.kng.security.medasApiSecurity.token.KngMedasTokenServiceImpl;
 
+
+/**
+ * Manual integration test for retrieving appointment data
+ * from the secured KNG MEDAS REST API.
+ *
+ * Expected architecture:
+ *
+ * PRIMARY:
+ * PATMRD
+ *   -> API Gateway
+ *   -> Eureka service discovery
+ *   -> KNG MEDAS REST
+ *
+ * SECONDARY:
+ * PATMRD
+ *   -> Direct MEDAS PRIME / fallback servers
+ *
+ * IMPORTANT:
+ *
+ * KngMedasEndpointResolver tracks only the secondary
+ * direct MEDAS route.
+ *
+ * Therefore:
+ *
+ * endpointResolver.getActiveBaseUrl() == null
+ *
+ * is completely valid when the request is successfully
+ * handled through the API Gateway.
+ */
 @Disabled("Manual KNG MEDAS integration test - do not run during normal WAR build")
 @SpringBootTest(classes = {
         KngMedasApiConfig.class,
@@ -82,22 +111,56 @@ public class KngMedasAppointmentsGetTest
 
         // --------------------------------------------------------------------------------------------------------
         // STEP 1
-        // VERIFY MEDAS SERVERS ARE CONFIGURED
+        // VERIFY MEDAS CONFIGURATION
         // --------------------------------------------------------------------------------------------------------
 
         assertFalse(
                 properties.getCandidateBaseUrls().isEmpty(),
-                "At least one KNG MEDAS REST API server must be configured.");
+                "At least one direct KNG MEDAS REST API server must be configured.");
 
         System.out.println();
-
         System.out.println(
-                "STEP 1 - Configured MEDAS Servers");
+                "STEP 1 - KNG MEDAS CONFIGURATION");
 
-        for (String baseUrl : properties.getCandidateBaseUrls())
+
+        // --------------------------------------------------------------------------------------------------------
+        // DISPLAY GATEWAY CONFIGURATION
+        // --------------------------------------------------------------------------------------------------------
+
+        String gatewayBaseUrl =
+                properties.getGatewayBaseUrl();
+
+
+        if (gatewayBaseUrl != null)
         {
             System.out.println(
-                    "Candidate = " + baseUrl);
+                    "Gateway enabled/configured = true");
+
+            System.out.println(
+                    "Gateway Base URL = "
+                            + gatewayBaseUrl);
+        }
+        else
+        {
+            System.out.println(
+                    "Gateway enabled/configured = false");
+        }
+
+
+        // --------------------------------------------------------------------------------------------------------
+        // DISPLAY DIRECT FALLBACK SERVERS
+        // --------------------------------------------------------------------------------------------------------
+
+        System.out.println();
+        System.out.println(
+                "Configured Direct MEDAS Servers:");
+
+        for (String baseUrl :
+                properties.getCandidateBaseUrls())
+        {
+            System.out.println(
+                    "Candidate = "
+                            + baseUrl);
         }
 
 
@@ -107,12 +170,13 @@ public class KngMedasAppointmentsGetTest
         // --------------------------------------------------------------------------------------------------------
 
         System.out.println();
-
         System.out.println(
                 "STEP 2 - Authenticating against KNG MEDAS...");
 
+
         String token =
                 tokenService.getValidToken();
+
 
         assertNotNull(
                 token,
@@ -123,33 +187,79 @@ public class KngMedasAppointmentsGetTest
                 "JWT token should not be empty.");
 
 
-        String activeServer =
-                endpointResolver.getActiveBaseUrl();
-
-        assertNotNull(
-                activeServer,
-                "Active MEDAS server should not be null.");
-
-
+        /*
+         * SECURITY:
+         *
+         * Never print:
+         *
+         * - JWT token
+         * - password
+         * - Authorization header
+         */
         System.out.println();
-
         System.out.println(
                 "Authentication successful.");
 
         System.out.println(
-                "Active MEDAS Server = "
-                        + activeServer);
+                "JWT received successfully.");
 
 
         // --------------------------------------------------------------------------------------------------------
         // STEP 3
+        // DISPLAY AUTHENTICATION ROUTE
+        // --------------------------------------------------------------------------------------------------------
+
+        String activeDirectServer =
+                endpointResolver.getActiveBaseUrl();
+
+
+        System.out.println();
+        System.out.println(
+                "STEP 3 - Authentication Route");
+
+
+        if (activeDirectServer == null)
+        {
+            /*
+             * Normal result when authentication succeeds
+             * through the API Gateway.
+             *
+             * The endpoint resolver stores only direct
+             * MEDAS server state.
+             */
+            System.out.println(
+                    "Authentication Route = API GATEWAY");
+
+            System.out.println(
+                    "Gateway Base URL = "
+                            + gatewayBaseUrl);
+
+            System.out.println(
+                    "Active Direct MEDAS Server = NONE");
+        }
+        else
+        {
+            /*
+             * A non-null direct server means authentication
+             * used the secondary direct MEDAS route.
+             */
+            System.out.println(
+                    "Authentication Route = DIRECT MEDAS");
+
+            System.out.println(
+                    "Active Direct MEDAS Server = "
+                            + activeDirectServer);
+        }
+
+
+        // --------------------------------------------------------------------------------------------------------
+        // STEP 4
         // CALL APPOINTMENTS REST API
         // --------------------------------------------------------------------------------------------------------
 
         System.out.println();
-
         System.out.println(
-                "STEP 3 - Calling Appointments REST API...");
+                "STEP 4 - Calling Appointments REST API...");
 
         System.out.println(
                 "Endpoint = "
@@ -164,7 +274,7 @@ public class KngMedasAppointmentsGetTest
 
 
         // --------------------------------------------------------------------------------------------------------
-        // STEP 4
+        // STEP 5
         // VERIFY RESPONSE
         // --------------------------------------------------------------------------------------------------------
 
@@ -174,20 +284,19 @@ public class KngMedasAppointmentsGetTest
 
 
         System.out.println();
-
         System.out.println(
                 "Appointments REST API response received successfully.");
 
 
         // --------------------------------------------------------------------------------------------------------
-        // STEP 5
+        // STEP 6
         // DISPLAY SPRING PAGE INFORMATION
         // --------------------------------------------------------------------------------------------------------
 
         System.out.println();
-
         System.out.println(
-                "STEP 5 - Appointment Page Information");
+                "STEP 6 - Appointment Page Information");
+
 
         System.out.println(
                 "Total Elements = "
@@ -219,12 +328,13 @@ public class KngMedasAppointmentsGetTest
 
 
         // --------------------------------------------------------------------------------------------------------
-        // STEP 6
+        // STEP 7
         // VERIFY CONTENT FIELD
         // --------------------------------------------------------------------------------------------------------
 
         Object content =
                 response.get("content");
+
 
         assertNotNull(
                 content,
@@ -232,7 +342,6 @@ public class KngMedasAppointmentsGetTest
 
 
         System.out.println();
-
         System.out.println(
                 "Appointment content received.");
 
@@ -242,11 +351,65 @@ public class KngMedasAppointmentsGetTest
 
 
         // --------------------------------------------------------------------------------------------------------
+        // STEP 8
+        // IDENTIFY FINAL REQUEST ROUTE
+        // --------------------------------------------------------------------------------------------------------
+
+        String finalActiveDirectServer =
+                endpointResolver.getActiveBaseUrl();
+
+
+        System.out.println();
+        System.out.println(
+                "STEP 8 - Request Route Result");
+
+
+        if (finalActiveDirectServer == null)
+        {
+            /*
+             * No direct server became active.
+             *
+             * Therefore the request remained on the
+             * Gateway-primary route.
+             */
+            System.out.println(
+                    "Request Route = API GATEWAY");
+
+            System.out.println(
+                    "Gateway Base URL = "
+                            + gatewayBaseUrl);
+
+            System.out.println(
+                    "Active Direct MEDAS Server = NONE");
+        }
+        else
+        {
+            /*
+             * A direct server became active.
+             *
+             * This can happen when:
+             *
+             * - Gateway is disabled
+             * - Gateway is unreachable
+             * - Gateway returns 502 / 503 / 504
+             *
+             * GET is safe to replay through the
+             * direct failover chain.
+             */
+            System.out.println(
+                    "Request Route = DIRECT MEDAS");
+
+            System.out.println(
+                    "Active Direct MEDAS Server = "
+                            + finalActiveDirectServer);
+        }
+
+
+        // --------------------------------------------------------------------------------------------------------
         // SUCCESS
         // --------------------------------------------------------------------------------------------------------
 
         System.out.println();
-
         System.out.println(
                 "=======================================================");
 
@@ -256,21 +419,20 @@ public class KngMedasAppointmentsGetTest
         System.out.println(
                 "=======================================================");
 
-        System.out.println();
 
-        System.out.println(
-                "MEDAS Server Used = "
-                        + endpointResolver.getActiveBaseUrl());
+        System.out.println();
 
         System.out.println(
                 "Endpoint Used = "
                         + TEST_GET_ENDPOINT);
+
 
         System.out.println();
 
         System.out.println(
                 "PATMRD successfully retrieved appointment data "
                         + "from the secured KNG MEDAS REST API.");
+
 
         System.out.println();
 

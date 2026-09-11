@@ -31,6 +31,47 @@ import kw.kng.security.medasApiSecurity.endpoint.KngMedasEndpointResolverImpl;
 import kw.kng.security.medasApiSecurity.token.KngMedasTokenService;
 import kw.kng.security.medasApiSecurity.token.KngMedasTokenServiceImpl;
 
+
+/**
+ * Manual controlled CRUD integration test for REASON_SETUP.
+ *
+ * Architecture:
+ *
+ * PRIMARY:
+ * PATMRD
+ *   -> API Gateway
+ *   -> KNG MEDAS REST
+ *
+ * SECONDARY:
+ * PATMRD
+ *   -> Direct MEDAS PRIME / fallback servers
+ *
+ *
+ * IMPORTANT WRITE SAFETY:
+ *
+ * POST / PUT / DELETE operations are NOT intended to be
+ * automatically replayed after an uncertain Gateway/network
+ * failure.
+ *
+ * Therefore:
+ *
+ * - Keep API Gateway running during this test.
+ * - Keep KNG MEDAS REST running during this test.
+ * - Do NOT intentionally stop Gateway during POST / PUT / DELETE.
+ *
+ *
+ * CRUD lifecycle:
+ *
+ * 1. CREATE test row
+ * 2. GET and verify created row
+ * 3. UPDATE same row
+ * 4. GET and verify updated row
+ * 5. DELETE same row
+ * 6. GET and verify HTTP 404
+ *
+ *
+ * Only the record created by this test is modified/deleted.
+ */
 @Disabled("Manual KNG MEDAS integration test - do not run during normal WAR build")
 @SpringBootTest(classes = {
         KngMedasApiConfig.class,
@@ -67,14 +108,18 @@ public class KngMedasReasonSetupCrudTest
     // ############################################################################################################
 
     /*
-     * The reasonCode returned from the POST operation is stored here.
+     * The reasonCode returned from the POST operation
+     * is stored here.
      *
-     * UPDATE and DELETE will operate ONLY on this newly-created test row.
+     * UPDATE and DELETE operate ONLY on the newly-created
+     * test row.
      */
     private static Long createdReasonCode;
 
+
     /*
-     * Unique value so that the test record is easy to identify in Oracle.
+     * Unique test value so the row is easy to identify
+     * in Oracle if manual inspection is required.
      */
     private static final String CREATE_REASON_NAME =
             "PATMRD REST API TEST - CREATE - "
@@ -100,7 +145,7 @@ public class KngMedasReasonSetupCrudTest
 
     // ############################################################################################################
     // TEST 1
-    // POST - INSERT
+    // POST - CREATE
     // ############################################################################################################
 
     @Test
@@ -121,12 +166,51 @@ public class KngMedasReasonSetupCrudTest
 
         // --------------------------------------------------------------------------------------------------------
         // STEP 1
-        // VERIFY SERVER CONFIGURATION
+        // VERIFY CONFIGURATION
         // --------------------------------------------------------------------------------------------------------
 
         assertFalse(
                 properties.getCandidateBaseUrls().isEmpty(),
-                "At least one KNG MEDAS server must be configured.");
+                "At least one direct KNG MEDAS REST API server must be configured.");
+
+
+        String gatewayBaseUrl =
+                properties.getGatewayBaseUrl();
+
+
+        System.out.println();
+        System.out.println(
+                "STEP 1 - KNG MEDAS CONFIGURATION");
+
+
+        if (gatewayBaseUrl != null)
+        {
+            System.out.println(
+                    "Gateway enabled/configured = true");
+
+            System.out.println(
+                    "Gateway Base URL = "
+                            + gatewayBaseUrl);
+        }
+        else
+        {
+            System.out.println(
+                    "Gateway enabled/configured = false");
+        }
+
+
+        System.out.println();
+        System.out.println(
+                "Configured Direct MEDAS Servers:");
+
+
+        for (String baseUrl :
+                properties.getCandidateBaseUrls())
+        {
+            System.out.println(
+                    "Candidate = "
+                            + baseUrl);
+        }
 
 
         // --------------------------------------------------------------------------------------------------------
@@ -136,7 +220,7 @@ public class KngMedasReasonSetupCrudTest
 
         System.out.println();
         System.out.println(
-                "STEP 1 - Authenticating against KNG MEDAS...");
+                "STEP 2 - Authenticating against KNG MEDAS...");
 
 
         String token =
@@ -152,16 +236,70 @@ public class KngMedasReasonSetupCrudTest
                 "JWT token should not be empty.");
 
 
+        /*
+         * SECURITY:
+         *
+         * Never print:
+         *
+         * - JWT token
+         * - password
+         * - Authorization header
+         */
+        System.out.println();
         System.out.println(
                 "Authentication successful.");
 
         System.out.println(
-                "Active MEDAS Server = "
-                        + endpointResolver.getActiveBaseUrl());
+                "JWT received successfully.");
 
 
         // --------------------------------------------------------------------------------------------------------
         // STEP 3
+        // DISPLAY AUTHENTICATION ROUTE
+        // --------------------------------------------------------------------------------------------------------
+
+        String activeDirectServer =
+                endpointResolver.getActiveBaseUrl();
+
+
+        System.out.println();
+        System.out.println(
+                "STEP 3 - Authentication Route");
+
+
+        if (activeDirectServer == null)
+        {
+            /*
+             * Normal when authentication succeeds
+             * through the API Gateway.
+             */
+            System.out.println(
+                    "Authentication Route = API GATEWAY");
+
+            System.out.println(
+                    "Gateway Base URL = "
+                            + gatewayBaseUrl);
+
+            System.out.println(
+                    "Active Direct MEDAS Server = NONE");
+        }
+        else
+        {
+            /*
+             * A non-null direct server indicates that
+             * authentication used the secondary direct route.
+             */
+            System.out.println(
+                    "Authentication Route = DIRECT MEDAS");
+
+            System.out.println(
+                    "Active Direct MEDAS Server = "
+                            + activeDirectServer);
+        }
+
+
+        // --------------------------------------------------------------------------------------------------------
+        // STEP 4
         // BUILD CREATE REQUEST
         // --------------------------------------------------------------------------------------------------------
 
@@ -175,7 +313,7 @@ public class KngMedasReasonSetupCrudTest
 
         System.out.println();
         System.out.println(
-                "STEP 2 - Creating REASON_SETUP record...");
+                "STEP 4 - Creating REASON_SETUP record...");
 
         System.out.println(
                 "Reason Name = "
@@ -183,7 +321,7 @@ public class KngMedasReasonSetupCrudTest
 
 
         // --------------------------------------------------------------------------------------------------------
-        // STEP 4
+        // STEP 5
         // POST
         // --------------------------------------------------------------------------------------------------------
 
@@ -210,6 +348,7 @@ public class KngMedasReasonSetupCrudTest
 
         Number generatedId =
                 (Number) response.get("reasonCode");
+
 
         createdReasonCode =
                 generatedId.longValue();
@@ -239,13 +378,13 @@ public class KngMedasReasonSetupCrudTest
 
 
         // --------------------------------------------------------------------------------------------------------
-        // STEP 5
-        // VERIFY USING GET
+        // STEP 6
+        // VERIFY CREATED ROW USING GET
         // --------------------------------------------------------------------------------------------------------
 
         System.out.println();
         System.out.println(
-                "STEP 3 - Verifying inserted row using GET...");
+                "STEP 6 - Verifying inserted row using GET...");
 
 
         @SuppressWarnings("rawtypes")
@@ -258,6 +397,10 @@ public class KngMedasReasonSetupCrudTest
         assertNotNull(
                 verifyResponse,
                 "Inserted ReasonSetup record should be retrievable.");
+
+        assertNotNull(
+                verifyResponse.get("reasonCode"),
+                "Retrieved reasonCode should not be null.");
 
         assertEquals(
                 createdReasonCode.longValue(),
@@ -362,6 +505,10 @@ public class KngMedasReasonSetupCrudTest
                 response,
                 "Update response should not be null.");
 
+        assertNotNull(
+                response.get("reasonCode"),
+                "Updated reasonCode should not be null.");
+
         assertEquals(
                 createdReasonCode.longValue(),
                 ((Number) response.get("reasonCode")).longValue(),
@@ -399,6 +546,15 @@ public class KngMedasReasonSetupCrudTest
                 verifyResponse,
                 "Updated ReasonSetup record should be retrievable.");
 
+        assertNotNull(
+                verifyResponse.get("reasonCode"),
+                "Retrieved reasonCode should not be null.");
+
+        assertEquals(
+                createdReasonCode.longValue(),
+                ((Number) verifyResponse.get("reasonCode")).longValue(),
+                "Retrieved reasonCode should remain unchanged.");
+
         assertEquals(
                 updatedReasonName,
                 verifyResponse.get("reasonName"),
@@ -420,6 +576,11 @@ public class KngMedasReasonSetupCrudTest
                 "=======================================================");
     }
 
+
+    // ############################################################################################################
+    // TEST 3
+    // DELETE
+    // ############################################################################################################
 
     @Test
     @Order(3)
@@ -474,6 +635,10 @@ public class KngMedasReasonSetupCrudTest
                 beforeDeleteResponse,
                 "ReasonSetup record should exist before DELETE.");
 
+        assertNotNull(
+                beforeDeleteResponse.get("reasonCode"),
+                "Reason code should not be null before DELETE.");
+
         assertEquals(
                 createdReasonCode.longValue(),
                 ((Number) beforeDeleteResponse.get("reasonCode")).longValue(),
@@ -517,7 +682,8 @@ public class KngMedasReasonSetupCrudTest
                 "Verifying deleted row using GET...");
 
 
-        boolean recordNotFound = false;
+        boolean recordNotFound =
+                false;
 
 
         try
@@ -531,7 +697,9 @@ public class KngMedasReasonSetupCrudTest
         catch (HttpClientErrorException.NotFound ex)
         {
 
-            recordNotFound = true;
+            recordNotFound =
+                    true;
+
 
             System.out.println(
                     "HTTP 404 received as expected.");
@@ -540,7 +708,6 @@ public class KngMedasReasonSetupCrudTest
                     "Deleted Reason Code "
                             + createdReasonCode
                             + " is no longer available.");
-
         }
 
 
@@ -577,6 +744,7 @@ public class KngMedasReasonSetupCrudTest
         System.out.println(
                 "=======================================================");
 
+
         System.out.println();
 
         System.out.println(
@@ -602,6 +770,7 @@ public class KngMedasReasonSetupCrudTest
 
         System.out.println(
                 "6. Verified as NOT FOUND after DELETE.");
+
 
         System.out.println();
 

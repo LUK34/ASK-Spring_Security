@@ -3,9 +3,20 @@ package kw.kng.security.medasApiSecurity.endpoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Service;
 
 import kw.kng.security.medasApiSecurity.config.KngMedasApiProperties;
+
+/*
+	// ################################################################################################################################
+	 													
+	 												// CODE 2:
+	
+	// ################################################################################################################################
+*/
 
 /**
  * Resolves and tracks the active KNG MEDAS REST API server.
@@ -16,39 +27,39 @@ import kw.kng.security.medasApiSecurity.config.KngMedasApiProperties;
  * </p>
  *
  * <p>
- * Once a working MEDAS server is identified, it is stored as the active
- * server and is tried first for subsequent REST API calls.
+ * Once a working MEDAS server is identified, it is stored as the active server
+ * and is tried first for subsequent REST API calls.
  * </p>
  *
  * <p>
- * If the active server later becomes unavailable, it can be invalidated.
- * The next MEDAS authentication/API resolution cycle can then search the
- * configured PRIME -> fallback server list again.
+ * If the active server later becomes unavailable, it can be invalidated. The
+ * next MEDAS authentication/API resolution cycle can then search the configured
+ * PRIME -> fallback server list again.
  * </p>
  */
 @Service
-public class KngMedasEndpointResolverImpl implements KngMedasEndpointResolver 
-{
+public class KngMedasEndpointResolverImpl implements KngMedasEndpointResolver {
+
+	private static final Logger log = LoggerFactory.getLogger(KngMedasEndpointResolverImpl.class);
+
 	/*
-	 * Central KNG MEDAS configuration containing the PRIME server,
-	 * fallback servers and related API configuration.
+	 * Central KNG MEDAS configuration containing the PRIME server, fallback servers
+	 * and related API configuration.
 	 */
 	private final KngMedasApiProperties properties;
 
 	/*
 	 * Server currently known to be working.
 	 *
-	 * volatile ensures that changes to the active server are visible to
-	 * application threads that may be making MEDAS REST API calls concurrently.
+	 * volatile ensures that changes to the active server are visible to application
+	 * threads that may be making MEDAS REST API calls concurrently.
 	 */
 	private volatile String activeBaseUrl;
 
-	
 	/**
 	 * Creates the endpoint resolver using the configured KNG MEDAS properties.
 	 */
-	public KngMedasEndpointResolverImpl(KngMedasApiProperties properties) 
-	{
+	public KngMedasEndpointResolverImpl(KngMedasApiProperties properties) {
 		this.properties = properties;
 	}
 
@@ -61,22 +72,19 @@ public class KngMedasEndpointResolverImpl implements KngMedasEndpointResolver
 	 * </p>
 	 *
 	 * <p>
-	 * If a working server is already known, that active server is placed first
-	 * so subsequent MEDAS calls continue using the known working server.
-	 * Remaining configured servers are then added without duplicating the
-	 * active URL.
+	 * If a working server is already known, that active server is placed first so
+	 * subsequent MEDAS calls continue using the known working server. Remaining
+	 * configured servers are then added without duplicating the active URL.
 	 * </p>
 	 */
 	@Override
-	public List<String> getCandidateBaseUrls() 
-	{
+	public List<String> getCandidateBaseUrls() {
 		List<String> configured = properties.getCandidateBaseUrls();
 
 		/*
 		 * When we already know a working server, try it first.
 		 */
-		if (activeBaseUrl == null) 
-		{
+		if (activeBaseUrl == null) {
 			return configured;
 		}
 
@@ -86,13 +94,11 @@ public class KngMedasEndpointResolverImpl implements KngMedasEndpointResolver
 		ordered.add(activeBaseUrl);
 
 		/*
-		 * Add the remaining configured servers while avoiding duplication
-		 * of the active server already added above.
+		 * Add the remaining configured servers while avoiding duplication of the active
+		 * server already added above.
 		 */
-		for (String url : configured) 
-		{
-			if (!activeBaseUrl.equals(url)) 
-			{
+		for (String url : configured) {
+			if (!activeBaseUrl.equals(url)) {
 				ordered.add(url);
 			}
 		}
@@ -119,18 +125,20 @@ public class KngMedasEndpointResolverImpl implements KngMedasEndpointResolver
 	@Override
 	public synchronized void markActive(String baseUrl) {
 		this.activeBaseUrl = baseUrl;
+		log.info("KNG MEDAS direct route marked active: {}", baseUrl);
 	}
 
 	/**
-	 * Invalidates the active server only when the supplied URL matches the
-	 * server that is currently marked as active.
+	 * Invalidates the active server only when the supplied URL matches the server
+	 * that is currently marked as active.
 	 *
-	 * This prevents a failure relating to another URL from accidentally
-	 * clearing the currently selected working server.
+	 * This prevents a failure relating to another URL from accidentally clearing
+	 * the currently selected working server.
 	 */
 	@Override
 	public synchronized void invalidate(String baseUrl) {
 		if (baseUrl != null && baseUrl.equals(activeBaseUrl)) {
+			log.warn("Invalidating active KNG MEDAS direct route: {}", activeBaseUrl);
 			activeBaseUrl = null;
 		}
 	}
@@ -143,6 +151,11 @@ public class KngMedasEndpointResolverImpl implements KngMedasEndpointResolver
 	 */
 	@Override
 	public synchronized void invalidate() {
+		if (activeBaseUrl != null) 
+		{
+			log.warn("Clearing active KNG MEDAS direct route: {}", activeBaseUrl);
+		}
+
 		activeBaseUrl = null;
 	}
 }
