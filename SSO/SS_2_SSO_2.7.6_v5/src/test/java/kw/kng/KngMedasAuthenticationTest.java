@@ -3,7 +3,6 @@ package kw.kng;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -26,285 +25,185 @@ import kw.kng.security.medasApiSecurity.token.KngMedasTokenServiceImpl;
  *
  * Expected architecture:
  *
- * PRIMARY:
- * PATMRD -> API Gateway -> KNG MEDAS REST
+ * PRIMARY: PATMRD -> API Gateway -> KNG MEDAS REST
  *
- * SECONDARY:
- * PATMRD -> Direct MEDAS PRIME / fallback servers
+ * SECONDARY: PATMRD -> Direct MEDAS PRIME / fallback servers
  *
- * IMPORTANT:
- * When authentication succeeds through the API Gateway,
+ * IMPORTANT: When authentication succeeds through the API Gateway,
  * KngMedasEndpointResolver does NOT contain an active server.
  *
- * The endpoint resolver tracks only the secondary direct
- * MEDAS route.
+ * The endpoint resolver tracks only the secondary direct MEDAS route.
  */
 //@Disabled("Manual KNG MEDAS integration test - do not run during normal WAR build")
-@SpringBootTest(classes = {
-        KngMedasApiConfig.class,
-        KngMedasEndpointResolverImpl.class,
-        KngMedasAuthClient.class,
-        KngMedasTokenServiceImpl.class,
-        KngMedasAuthenticationTest.TestConfig.class
-})
+@SpringBootTest(classes = { KngMedasApiConfig.class, KngMedasEndpointResolverImpl.class, KngMedasAuthClient.class,
+		KngMedasTokenServiceImpl.class, KngMedasAuthenticationTest.TestConfig.class })
 @ActiveProfiles("prod")
-public class KngMedasAuthenticationTest
-{
+public class KngMedasAuthenticationTest {
 
-    @Autowired
-    private KngMedasTokenService tokenService;
+	@Autowired
+	private KngMedasTokenService tokenService;
 
-    @Autowired
-    private KngMedasApiProperties properties;
+	@Autowired
+	private KngMedasApiProperties properties;
 
-    @Autowired
-    private KngMedasEndpointResolver endpointResolver;
+	@Autowired
+	private KngMedasEndpointResolver endpointResolver;
 
+	@Test
+	public void testKngMedasAuthentication() {
+		System.out.println("=======================================================");
 
-    @Test
-    public void testKngMedasAuthentication()
-    {
-        System.out.println(
-                "=======================================================");
+		System.out.println("KNG MEDAS JWT AUTHENTICATION TEST -> START");
 
-        System.out.println(
-                "KNG MEDAS JWT AUTHENTICATION TEST -> START");
+		System.out.println("=======================================================");
 
-        System.out.println(
-                "=======================================================");
+		// --------------------------------------------------------------------------------------------------------
+		// STEP 1
+		// VERIFY CONFIGURATION
+		// --------------------------------------------------------------------------------------------------------
 
+		System.out.println();
+		System.out.println("STEP 1 - KNG MEDAS CONFIGURATION");
 
-        // --------------------------------------------------------------------------------------------------------
-        // STEP 1
-        // VERIFY CONFIGURATION
-        // --------------------------------------------------------------------------------------------------------
+		System.out.println("Auth URL = " + properties.getAuthUrl());
 
-        System.out.println();
-        System.out.println(
-                "STEP 1 - KNG MEDAS CONFIGURATION");
+		System.out.println("WAR = " + properties.getWar());
 
-        System.out.println(
-                "Auth URL = "
-                        + properties.getAuthUrl());
+		System.out.println("App Name = " + properties.getAppName());
 
-        System.out.println(
-                "WAR = "
-                        + properties.getWar());
+		boolean usernameConfigured = properties.getUsername() != null && !properties.getUsername().trim().isEmpty();
 
-        System.out.println(
-                "App Name = "
-                        + properties.getAppName());
+		boolean passwordConfigured = properties.getPassword() != null && !properties.getPassword().trim().isEmpty();
 
+		System.out.println("Username configured = " + usernameConfigured);
 
-        boolean usernameConfigured =
-                properties.getUsername() != null
-                        && !properties.getUsername()
-                                .trim()
-                                .isEmpty();
+		System.out.println("Password configured = " + passwordConfigured);
 
-        boolean passwordConfigured =
-                properties.getPassword() != null
-                        && !properties.getPassword()
-                                .trim()
-                                .isEmpty();
+		// --------------------------------------------------------------------------------------------------------
+		// STEP 2
+		// DISPLAY GATEWAY CONFIGURATION
+		// --------------------------------------------------------------------------------------------------------
 
+		System.out.println();
+		System.out.println("STEP 2 - API GATEWAY CONFIGURATION");
 
-        System.out.println(
-                "Username configured = "
-                        + usernameConfigured);
+		String gatewayBaseUrl = properties.getGatewayBaseUrl();
 
-        System.out.println(
-                "Password configured = "
-                        + passwordConfigured);
+		if (gatewayBaseUrl != null) {
+			System.out.println("Gateway enabled/configured = true");
 
+			System.out.println("Gateway Base URL = " + gatewayBaseUrl);
 
-        // --------------------------------------------------------------------------------------------------------
-        // STEP 2
-        // DISPLAY GATEWAY CONFIGURATION
-        // --------------------------------------------------------------------------------------------------------
+			System.out.println("Gateway Token URL = " + properties.buildTokenUrl(gatewayBaseUrl));
+		} else {
+			System.out.println("Gateway enabled/configured = false");
+		}
 
-        System.out.println();
-        System.out.println(
-                "STEP 2 - API GATEWAY CONFIGURATION");
+		// --------------------------------------------------------------------------------------------------------
+		// STEP 3
+		// DISPLAY SECONDARY DIRECT MEDAS CONFIGURATION
+		// --------------------------------------------------------------------------------------------------------
 
+		System.out.println();
+		System.out.println("STEP 3 - DIRECT MEDAS FALLBACK SERVERS");
 
-        String gatewayBaseUrl =
-                properties.getGatewayBaseUrl();
+		for (String baseUrl : properties.getCandidateBaseUrls()) {
+			System.out.println("Direct Base URL = " + baseUrl);
 
+			System.out.println("Direct Token URL = " + properties.buildTokenUrl(baseUrl));
+		}
 
-        if (gatewayBaseUrl != null)
-        {
-            System.out.println(
-                    "Gateway enabled/configured = true");
+		// --------------------------------------------------------------------------------------------------------
+		// STEP 4
+		// AUTHENTICATE
+		// --------------------------------------------------------------------------------------------------------
 
-            System.out.println(
-                    "Gateway Base URL = "
-                            + gatewayBaseUrl);
+		System.out.println();
+		System.out.println("STEP 4 - Requesting JWT...");
 
-            System.out.println(
-                    "Gateway Token URL = "
-                            + properties.buildTokenUrl(
-                                    gatewayBaseUrl));
-        }
-        else
-        {
-            System.out.println(
-                    "Gateway enabled/configured = false");
-        }
+		String token = tokenService.getValidToken();
 
+		// --------------------------------------------------------------------------------------------------------
+		// STEP 5
+		// VERIFY JWT
+		// --------------------------------------------------------------------------------------------------------
 
-        // --------------------------------------------------------------------------------------------------------
-        // STEP 3
-        // DISPLAY SECONDARY DIRECT MEDAS CONFIGURATION
-        // --------------------------------------------------------------------------------------------------------
-
-        System.out.println();
-        System.out.println(
-                "STEP 3 - DIRECT MEDAS FALLBACK SERVERS");
-
-
-        for (String baseUrl :
-                properties.getCandidateBaseUrls())
-        {
-            System.out.println(
-                    "Direct Base URL = "
-                            + baseUrl);
-
-            System.out.println(
-                    "Direct Token URL = "
-                            + properties.buildTokenUrl(
-                                    baseUrl));
-        }
-
-
-        // --------------------------------------------------------------------------------------------------------
-        // STEP 4
-        // AUTHENTICATE
-        // --------------------------------------------------------------------------------------------------------
-
-        System.out.println();
-        System.out.println(
-                "STEP 4 - Requesting JWT...");
-
-
-        String token =
-                tokenService.getValidToken();
-
-
-        // --------------------------------------------------------------------------------------------------------
-        // STEP 5
-        // VERIFY JWT
-        // --------------------------------------------------------------------------------------------------------
+		assertNotNull(token, "KNG MEDAS JWT token should not be null.");
 
-        assertNotNull(
-                token,
-                "KNG MEDAS JWT token should not be null.");
+		assertFalse(token.trim().isEmpty(), "KNG MEDAS JWT token should not be empty.");
 
-        assertFalse(
-                token.trim().isEmpty(),
-                "KNG MEDAS JWT token should not be empty.");
-
-
-        /*
-         * SECURITY:
-         *
-         * Never print:
-         *
-         * - JWT
-         * - password
-         * - Authorization header
-         */
-        System.out.println();
-        System.out.println(
-                "JWT received successfully.");
-
-
-        // --------------------------------------------------------------------------------------------------------
-        // STEP 6
-        // IDENTIFY ROUTE
-        // --------------------------------------------------------------------------------------------------------
-
-        String activeDirectBaseUrl =
-                endpointResolver.getActiveBaseUrl();
-
-
-        System.out.println();
-        System.out.println(
-                "STEP 5 - AUTHENTICATION ROUTE RESULT");
-
-
-        if (activeDirectBaseUrl == null)
-        {
-            /*
-             * This is the normal result when Gateway authentication
-             * succeeds.
-             *
-             * KngMedasEndpointResolver tracks ONLY direct MEDAS
-             * servers, therefore null here is valid.
-             */
-            System.out.println(
-                    "Authentication Route = API GATEWAY");
-
-            System.out.println(
-                    "Gateway Base URL = "
-                            + gatewayBaseUrl);
-
-            System.out.println(
-                    "Active Direct MEDAS Server = NONE");
-        }
-        else
-        {
-            /*
-             * A direct server being active means authentication
-             * was completed through the secondary direct route.
-             */
-            System.out.println(
-                    "Authentication Route = DIRECT MEDAS");
-
-            System.out.println(
-                    "Active Direct MEDAS Server = "
-                            + activeDirectBaseUrl);
-        }
-
-
-        // --------------------------------------------------------------------------------------------------------
-        // SUCCESS
-        // --------------------------------------------------------------------------------------------------------
-
-        System.out.println();
-        System.out.println(
-                "=======================================================");
-
-        System.out.println(
-                "KNG MEDAS JWT AUTHENTICATION -> SUCCESS");
-
-        System.out.println(
-                "=======================================================");
-
-        System.out.println(
-                "JWT was obtained successfully.");
-
-        System.out.println(
-                "Actual JWT value was NOT printed.");
-
-        System.out.println(
-                "=======================================================");
-    }
-
-
-    // ############################################################################################################
-    // TEST-ONLY SPRING CONFIGURATION
-    // ############################################################################################################
-
-    @Configuration
-    @EnableConfigurationProperties(
-            KngMedasApiProperties.class)
-    static class TestConfig
-    {
-        @Bean
-        RestTemplateBuilder restTemplateBuilder()
-        {
-            return new RestTemplateBuilder();
-        }
-    }
+		System.out.println();
+		System.out.println("JWT received successfully.");
+
+		System.out.println();
+		System.out.println("=======================================================");
+
+		System.out.println("JWT TOKEN:");
+
+		System.out.println(token);
+
+		System.out.println("=======================================================");
+
+		// --------------------------------------------------------------------------------------------------------
+		// STEP 6
+		// IDENTIFY ROUTE
+		// --------------------------------------------------------------------------------------------------------
+
+		String activeDirectBaseUrl = endpointResolver.getActiveBaseUrl();
+
+		System.out.println();
+		System.out.println("STEP 5 - AUTHENTICATION ROUTE RESULT");
+
+		if (activeDirectBaseUrl == null) {
+			/*
+			 * This is the normal result when Gateway authentication succeeds.
+			 *
+			 * KngMedasEndpointResolver tracks ONLY direct MEDAS servers, therefore null
+			 * here is valid.
+			 */
+			System.out.println("Authentication Route = API GATEWAY");
+
+			System.out.println("Gateway Base URL = " + gatewayBaseUrl);
+
+			System.out.println("Active Direct MEDAS Server = NONE");
+		} else {
+			/*
+			 * A direct server being active means authentication was completed through the
+			 * secondary direct route.
+			 */
+			System.out.println("Authentication Route = DIRECT MEDAS");
+
+			System.out.println("Active Direct MEDAS Server = " + activeDirectBaseUrl);
+		}
+
+		// --------------------------------------------------------------------------------------------------------
+		// SUCCESS
+		// --------------------------------------------------------------------------------------------------------
+
+		System.out.println();
+		System.out.println("=======================================================");
+
+		System.out.println("KNG MEDAS JWT AUTHENTICATION -> SUCCESS");
+
+		System.out.println("=======================================================");
+
+		System.out.println("JWT was obtained successfully.");
+
+		System.out.println("Actual JWT value was printed above.");
+
+		System.out.println("=======================================================");
+	}
+
+	// ############################################################################################################
+	// TEST-ONLY SPRING CONFIGURATION
+	// ############################################################################################################
+
+	@Configuration
+	@EnableConfigurationProperties(KngMedasApiProperties.class)
+	static class TestConfig {
+		@Bean
+		RestTemplateBuilder restTemplateBuilder() {
+			return new RestTemplateBuilder();
+		}
+	}
 }
